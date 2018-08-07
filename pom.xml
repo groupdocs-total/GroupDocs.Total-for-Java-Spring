@@ -6,10 +6,10 @@
 
     <groupId>com.groupdocs.ui</groupId>
     <artifactId>total-spring</artifactId>
-    <version>0.0.0</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
-    <name>GroupDocs.Total Spring</name>
+    <name>GroupDocs.Total for Java Spring Sample</name>
     <url>http://groupdocs.com</url>
 
     <properties>
