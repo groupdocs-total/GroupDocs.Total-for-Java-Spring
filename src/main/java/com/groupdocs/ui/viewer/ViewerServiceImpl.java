@@ -26,6 +26,7 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.MissingRequiredPropertiesException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -53,6 +54,12 @@ public class ViewerServiceImpl implements ViewerService {
      */
     @PostConstruct
     public void init() {
+        // check files directory
+        if (StringUtils.isEmpty(viewerConfiguration.getFilesDirectory())) {
+            logger.error("Files directory must be specified!");
+            throw new IllegalStateException("Files directory must be specified!");
+        }
+
         // Check if filesDirectory is relative or absolute path
         File filesDirectory = new File(viewerConfiguration.getFilesDirectory());
         if (!filesDirectory.exists()) {

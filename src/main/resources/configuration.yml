@@ -16,7 +16,7 @@ server:
 application:
   # License path
   # Absolute path to GroupDocs license file
-  licensePath:  /Users/elenko/Documents/groupdocs/lic/GroupDocs.Viewer.Java.lic
+  licensePath:  C:/GroupDocs/Java/Total/GroupDocs.Total.Java.lic
 
 
 ################################################
@@ -24,13 +24,13 @@ application:
 ################################################
 viewer:
   # Files directory path
-  # Absolute or relative path to files directory
-  filesDirectory: /App_Data/
+  # Absolute path to files directory
+  filesDirectory: C:/GroupDocs/Documents/
   # Fonts path
   # Absolute path to custom fonts directory
   fontsDirectory:
   # Default document
-  # Absolute or relative path to default document
+  # Absolute path to default document
   defaultDocument:
   # HTML rendering mode
   # Set false for image mode
@@ -78,13 +78,13 @@ viewer:
 signature:
   # Files directory path
   # Absolute or relative path to files directory
-  filesDirectory: /App_Data/
+  filesDirectory: C:/GroupDocs/Documents/
   # Output directory path
   # Absolute path to signed files directory
-  outputDirectory:
+  outputDirectory: C:/GroupDocs/Documents/
   # Data directory path
   # Absolute path to signature cache files directory
-  dataDirectory:
+  dataDirectory: C:/GroupDocs/Documents/
   # Enable/disable text signature
   textSignature: true
   # Enable/disable image signature
