@@ -1,4 +1,4 @@
-package com.groupdocs.ui.viewer.model;
+package com.groupdocs.ui.model.request;
 
 public class LoadDocumentPageRequest extends LoadDocumentRequest {
     private Integer page;

@@ -58,6 +58,12 @@
             <version>17.5.0</version>
             <type>jar</type>
         </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>11.0.2</version>
+        </dependency>
     </dependencies>
 
     <repositories>

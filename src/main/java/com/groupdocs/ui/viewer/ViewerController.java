@@ -2,15 +2,15 @@ package com.groupdocs.ui.viewer;
 
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
-import com.groupdocs.ui.model.FileDescriptionEntity;
-import com.groupdocs.ui.model.LoadedPageEntity;
-import com.groupdocs.ui.model.RotatedPageEntity;
-import com.groupdocs.ui.model.UploadedDocumentEntity;
+import com.groupdocs.ui.model.request.FileTreeRequest;
+import com.groupdocs.ui.model.request.LoadDocumentPageRequest;
+import com.groupdocs.ui.model.request.LoadDocumentRequest;
+import com.groupdocs.ui.model.response.FileDescriptionEntity;
+import com.groupdocs.ui.model.response.LoadedPageEntity;
+import com.groupdocs.ui.model.response.UploadedDocumentEntity;
 import com.groupdocs.ui.util.HttpUtils;
-import com.groupdocs.ui.viewer.model.FileTreeRequest;
-import com.groupdocs.ui.viewer.model.LoadDocumentPageRequest;
-import com.groupdocs.ui.viewer.model.LoadDocumentRequest;
-import com.groupdocs.ui.viewer.model.RotateDocumentPagesRequest;
+import com.groupdocs.ui.viewer.model.request.RotateDocumentPagesRequest;
+import com.groupdocs.ui.viewer.model.response.RotatedPageEntity;
 import com.groupdocs.viewer.domain.PageData;
 import com.groupdocs.viewer.domain.containers.DocumentInfoContainer;
 import org.apache.commons.io.FilenameUtils;
@@ -25,10 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
@@ -135,8 +132,8 @@ public class ViewerController {
     public UploadedDocumentEntity uploadDocument(@RequestParam("file") MultipartFile content,
                                                  @RequestParam("url") String url,
                                                  @RequestParam("rewrite") Boolean rewrite) {
+        InputStream uploadedInputStream = null;
         try {
-            InputStream uploadedInputStream;
             String fileName;
             if (StringUtils.isEmpty(url)) {
                 // get the InputStream to store the file
@@ -170,6 +167,12 @@ public class ViewerController {
         }catch(Exception ex){
             logger.error("Exception in uploading document", ex);
             throw new TotalGroupDocsException(ex.getMessage(), ex);
+        } finally {
+            try {
+                uploadedInputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

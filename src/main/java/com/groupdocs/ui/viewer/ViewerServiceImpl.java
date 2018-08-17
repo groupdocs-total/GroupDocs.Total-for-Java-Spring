@@ -2,12 +2,12 @@ package com.groupdocs.ui.viewer;
 
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
-import com.groupdocs.ui.model.FileDescriptionEntity;
-import com.groupdocs.ui.model.LoadedPageEntity;
-import com.groupdocs.ui.model.RotatedPageEntity;
-import com.groupdocs.ui.viewer.model.LoadDocumentPageRequest;
-import com.groupdocs.ui.viewer.model.LoadDocumentRequest;
-import com.groupdocs.ui.viewer.model.RotateDocumentPagesRequest;
+import com.groupdocs.ui.model.request.LoadDocumentPageRequest;
+import com.groupdocs.ui.model.request.LoadDocumentRequest;
+import com.groupdocs.ui.model.response.FileDescriptionEntity;
+import com.groupdocs.ui.model.response.LoadedPageEntity;
+import com.groupdocs.ui.viewer.model.request.RotateDocumentPagesRequest;
+import com.groupdocs.ui.viewer.model.response.RotatedPageEntity;
 import com.groupdocs.viewer.config.ViewerConfig;
 import com.groupdocs.viewer.converter.options.HtmlOptions;
 import com.groupdocs.viewer.converter.options.ImageOptions;
@@ -26,7 +26,6 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.MissingRequiredPropertiesException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 

@@ -130,4 +130,21 @@ public class SignatureConfiguration {
     public void setDownloadSigned(Boolean downloadSigned) {
         this.downloadSigned = downloadSigned;
     }
+
+    @Override
+    public String toString() {
+        return "SignatureConfiguration{" +
+                "filesDirectory='" + filesDirectory + '\'' +
+                ", outputDirectory='" + outputDirectory + '\'' +
+                ", dataDirectory='" + dataDirectory + '\'' +
+                ", textSignature=" + textSignature +
+                ", imageSignature=" + imageSignature +
+                ", digitalSignature=" + digitalSignature +
+                ", qrCodeSignature=" + qrCodeSignature +
+                ", barCodeSignature=" + barCodeSignature +
+                ", stampSignature=" + stampSignature +
+                ", downloadOriginal=" + downloadOriginal +
+                ", downloadSigned=" + downloadSigned +
+                '}';
+    }
 }

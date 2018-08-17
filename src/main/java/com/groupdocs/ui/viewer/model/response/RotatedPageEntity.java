@@ -1,4 +1,4 @@
-package com.groupdocs.ui.model;
+package com.groupdocs.ui.viewer.model.response;
 
 /**
  * RotatedPageEntity

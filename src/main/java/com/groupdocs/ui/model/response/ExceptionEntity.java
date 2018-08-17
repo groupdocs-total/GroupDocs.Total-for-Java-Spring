@@ -1,4 +1,4 @@
-package com.groupdocs.ui.model;
+package com.groupdocs.ui.model.response;
 
 /**
  * ExceptionEntity
@@ -8,6 +8,13 @@ package com.groupdocs.ui.model;
 public class ExceptionEntity {
     private String message;
     private Exception exception;
+
+    public ExceptionEntity() {
+    }
+
+    public ExceptionEntity(String message) {
+        this.message = message;
+    }
 
     public ExceptionEntity(String message, Exception exception) {
         this.message = message;
