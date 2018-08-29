@@ -18,6 +18,29 @@ application:
   # Absolute path to GroupDocs license file
   licensePath:  C:/GroupDocs/Java/Total/GroupDocs.Total.Java.lic
 
+################################################
+# Common configurations
+################################################
+common:
+  # File rewriting on document uploading
+  # Set false to keep both files
+  # Set true to replace files with same name
+  rewrite: true
+  # Page navigation
+  # Set false to disable document navigation (go to next, previous, last and first page)
+  pageSelector: true
+  # Document download
+  # Set false to disable document download
+  download: true
+  # Document upload
+  # Set false to disable document upload
+  upload: true
+  # Document print
+  # Set false to disable document print
+  print: true
+  # File browser
+  # Set false to disable document browse
+  browse: true
 
 ################################################
 # GroupDocs.Viewer configurations
@@ -40,16 +63,9 @@ viewer:
   # How many pages from a document should be loaded, remaining pages will be loaded on page scrolling
   # Set 0 to load all pages at once
   preloadPageCount: 0
-  # File rewriting on document uploading
-  # Set false to keep both files
-  # Set true to replace files with same name
-  rewrite: true
   # Document zoom
   # Set false to disable document zooming
   zoom: true
-  # Page navigation
-  # Set false to disable document navigation (go to next, previous, last and first page)
-  pageSelector: true
   # Document search
   # Set false to disable document text search
   search: true
@@ -59,29 +75,24 @@ viewer:
   # Page rotation
   # Set false to disable pages rotation
   rotate: true
-  # Document download
-  # Set false to disable document download
-  download: true
-  # Document upload
-  # Set false to disable document upload
-  upload: true
-  # Document print
-  # Set false to disable document print
-  print: true
-  # File browser
-  # Set false to disable document browse
-  browse: true
 
 ################################################
 # GroupDocs.Signature configurations
 ################################################
 signature:
   # Files directory path
-  # Absolute or relative path to files directory
+  # Absolute path to files directory
   filesDirectory: C:/GroupDocs/Documents/
   # Output directory path
   # Absolute path to signed files directory
   outputDirectory: C:/GroupDocs/Documents/
+  # Default document
+  # Absolute path to default document
+  defaultDocument:
+  # Pages preload
+  # How many pages from a document should be loaded, remaining pages will be loaded on page scrolling
+  # Set 0 to load all pages at once
+  preloadPageCount: 0
   # Data directory path
   # Absolute path to signature cache files directory
   dataDirectory: C:/GroupDocs/Documents/

@@ -1,5 +1,6 @@
 package com.groupdocs.ui.signature;
 
+import com.groupdocs.ui.config.CommonConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
@@ -8,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 @PropertySource("classpath:configuration.yml")
 @ConfigurationProperties("signature")
-public class SignatureConfiguration {
+public class SignatureConfiguration extends CommonConfiguration {
 
     @Value("${filesDirectory}")
     private String filesDirectory;
@@ -42,6 +43,12 @@ public class SignatureConfiguration {
 
     @Value("#{new Boolean('${downloadSigned}')}")
     private Boolean downloadSigned;
+
+    @Value("#{new Integer('${preloadPageCount}')}")
+    private Integer preloadPageCount;
+
+    @Value("${defaultDocument}")
+    private String defaultDocument;
 
     public String getFilesDirectory() {
         return filesDirectory;
@@ -131,9 +138,26 @@ public class SignatureConfiguration {
         this.downloadSigned = downloadSigned;
     }
 
+    public Integer getPreloadPageCount() {
+        return preloadPageCount;
+    }
+
+    public void setPreloadPageCount(Integer preloadPageCount) {
+        this.preloadPageCount = preloadPageCount;
+    }
+
+    public String getDefaultDocument() {
+        return defaultDocument;
+    }
+
+    public void setDefaultDocument(String defaultDocument) {
+        this.defaultDocument = defaultDocument;
+    }
+
     @Override
     public String toString() {
-        return "SignatureConfiguration{" +
+        return super.toString() +
+                "SignatureConfiguration{" +
                 "filesDirectory='" + filesDirectory + '\'' +
                 ", outputDirectory='" + outputDirectory + '\'' +
                 ", dataDirectory='" + dataDirectory + '\'' +
@@ -145,6 +169,8 @@ public class SignatureConfiguration {
                 ", stampSignature=" + stampSignature +
                 ", downloadOriginal=" + downloadOriginal +
                 ", downloadSigned=" + downloadSigned +
+                ", preloadPageCount=" + preloadPageCount +
+                ", defaultDocument='" + defaultDocument + '\'' +
                 '}';
     }
 }

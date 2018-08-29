@@ -13,7 +13,6 @@ import com.groupdocs.ui.signature.model.web.SignedDocumentEntity;
 import com.groupdocs.ui.signature.model.xml.OpticalXmlEntity;
 import com.groupdocs.ui.signature.model.xml.TextXmlEntity;
 import com.groupdocs.ui.util.Utils;
-import com.groupdocs.ui.viewer.ViewerConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,9 +46,6 @@ public class SignatureController {
     private GlobalConfiguration globalConfiguration;
 
     @Autowired
-    private ViewerConfiguration viewerConfiguration;
-
-    @Autowired
     private SignatureService signatureService;
 
     /**
@@ -62,7 +58,6 @@ public class SignatureController {
         model.put("globalConfiguration", globalConfiguration);
         logger.debug("signature config: {}", signatureService.getSignatureConfiguration());
         model.put("signatureConfiguration", signatureService.getSignatureConfiguration());
-        model.put("viewerConfiguration", viewerConfiguration);
         return "signature";
     }
 

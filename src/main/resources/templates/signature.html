@@ -39,19 +39,19 @@
         /*[+
         applicationPath: 'http://' + [[${globalConfiguration.server.hostAddress}]] + ':' + [[${globalConfiguration.server.httpPort}]] + '/signature',
         +]*/
-        defaultDocument: /*[[${viewerConfiguration.defaultDocument}]]*/'',
+        defaultDocument: /*[[${signatureConfiguration.defaultDocument}]]*/'',
         htmlMode: false,
-        preloadPageCount: /*[[${viewerConfiguration.preloadPageCount}]]*/'',
+        preloadPageCount: /*[[${signatureConfiguration.preloadPageCount}]]*/'',
         zoom : false,
-        pageSelector: /*[[${viewerConfiguration.pageSelector}]]*/'',
+        pageSelector: /*[[${signatureConfiguration.pageSelector}]]*/'',
         search: false,
         thumbnails: false,
         rotate: false,
-        download: /*[[${viewerConfiguration.download}]]*/'',
-        upload: /*[[${viewerConfiguration.upload}]]*/'',
-        print: /*[[${viewerConfiguration.print}]]*/'',
-        browse: /*[[${viewerConfiguration.browse}]]*/'',
-        rewrite: /*[[${viewerConfiguration.rewrite}]]*/''
+        download: /*[[${signatureConfiguration.download}]]*/'',
+        upload: /*[[${signatureConfiguration.upload}]]*/'',
+        print: /*[[${signatureConfiguration.print}]]*/'',
+        browse: /*[[${signatureConfiguration.browse}]]*/'',
+        rewrite: /*[[${signatureConfiguration.rewrite}]]*/''
     });
     $('#element').signature({
         textSignature: /*[[${signatureConfiguration.textSignature}]]*/'',
