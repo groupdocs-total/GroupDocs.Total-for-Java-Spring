@@ -55,7 +55,7 @@ import java.util.List;
 import static com.groupdocs.ui.signature.PathConstants.DATA_FOLDER;
 import static com.groupdocs.ui.signature.PathConstants.OUTPUT_FOLDER;
 import static com.groupdocs.ui.signature.model.SignatureDirectory.*;
-import static com.groupdocs.ui.util.HttpUtils.getFreeFileName;
+import static com.groupdocs.ui.util.Utils.getFreeFileName;
 
 @Service
 public class SignatureServiceImpl implements SignatureService {
@@ -81,8 +81,12 @@ public class SignatureServiceImpl implements SignatureService {
     @PostConstruct
     public void init() {
         // set GroupDocs license
-        License license = new License();
-        license.setLicense(globalConfiguration.getApplication().getLicensePath());
+        try {
+            License license = new License();
+            license.setLicense(globalConfiguration.getApplication().getLicensePath());
+        } catch (Throwable exc) {
+            logger.error("Can not verify Signature license!");
+        }
 
         // check if data directory is set, if not set new directory
         if (signatureConfiguration.getDataDirectory() == null || signatureConfiguration.getDataDirectory().isEmpty()) {

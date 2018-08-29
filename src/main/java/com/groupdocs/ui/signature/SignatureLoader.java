@@ -14,6 +14,8 @@ import java.util.*;
 
 import static com.groupdocs.ui.signature.PathConstants.DATA_PREVIEW_FOLDER;
 import static com.groupdocs.ui.signature.PathConstants.DATA_XML_FOLDER;
+import static com.groupdocs.ui.util.Utils.FILE_NAME_COMPARATOR;
+import static com.groupdocs.ui.util.Utils.FILE_TYPE_COMPARATOR;
 
 /**
  * SignatureLoader
@@ -23,8 +25,6 @@ import static com.groupdocs.ui.signature.PathConstants.DATA_XML_FOLDER;
  */
 @Service
 public class SignatureLoader {
-    public static final FileNameComparator FILE_NAME_COMPARATOR = new FileNameComparator();
-    public static final FileTypeComparator FILE_TYPE_COMPARATOR = new FileTypeComparator();
 
     /**
      * Load image signatures
@@ -158,57 +158,4 @@ public class SignatureLoader {
         return fileDescription;
     }
 
-    /**
-     * FileNameComparator
-     * Compare and sort file names alphabetically
-     *
-     * @author Aspose Pty Ltd
-     */
-    static class FileNameComparator implements Comparator<File> {
-
-        /**
-         * Compare two file names
-         *
-         * @param file1
-         * @param file2
-         * @return int
-         */
-        @Override
-        public int compare(File file1, File file2) {
-
-            return String.CASE_INSENSITIVE_ORDER.compare(file1.getName(),
-                    file2.getName());
-        }
-    }
-
-    /**
-     * FileTypeComparator
-     * Compare and sort file types - folders first
-     *
-     * @author Aspose Pty Ltd
-     */
-    static class FileTypeComparator implements Comparator<File> {
-
-        /**
-         * Compare two file types
-         *
-         * @param file1
-         * @param file2
-         * @return
-         */
-        @Override
-        public int compare(File file1, File file2) {
-
-            if (file1.isDirectory() && file2.isFile()) {
-                return -1;
-            }
-            if (file1.isDirectory() && file2.isDirectory()) {
-                return 0;
-            }
-            if (file1.isFile() && file2.isFile()) {
-                return 0;
-            }
-            return 1;
-        }
-    }
 }

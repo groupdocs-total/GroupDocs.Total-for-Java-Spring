@@ -12,7 +12,7 @@ import com.groupdocs.ui.signature.model.web.SignatureFileDescriptionEntity;
 import com.groupdocs.ui.signature.model.web.SignedDocumentEntity;
 import com.groupdocs.ui.signature.model.xml.OpticalXmlEntity;
 import com.groupdocs.ui.signature.model.xml.TextXmlEntity;
-import com.groupdocs.ui.util.HttpUtils;
+import com.groupdocs.ui.util.Utils;
 import com.groupdocs.ui.viewer.ViewerConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -109,7 +109,7 @@ public class SignatureController {
         File file = new File(documentGuid);
         String fileName = file.getName();
         // set response content info
-        HttpUtils.addFileDownloadHeaders(response, fileName, file.length());
+        Utils.addFileDownloadHeaders(response, fileName, file.length());
         String pathToDownload;
         if (signed) {
             String dataDirectory = signatureService.getSignatureConfiguration().getDataDirectory();

@@ -6,10 +6,14 @@ import org.springframework.http.MediaType;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class HttpUtils {
+public class Utils {
+
+    public static final FileNameComparator FILE_NAME_COMPARATOR = new FileNameComparator();
+    public static final FileTypeComparator FILE_TYPE_COMPARATOR = new FileTypeComparator();
 
     /**
      * Fill header HTTP response with file data
@@ -67,5 +71,60 @@ public class HttpUtils {
             e.printStackTrace();
         }
         return file;
+    }
+
+
+    /**
+     * FileNameComparator
+     * Compare and sort file names alphabetically
+     *
+     * @author Aspose Pty Ltd
+     */
+    static class FileNameComparator implements Comparator<File> {
+
+        /**
+         * Compare two file names
+         *
+         * @param file1
+         * @param file2
+         * @return int
+         */
+        @Override
+        public int compare(File file1, File file2) {
+
+            return String.CASE_INSENSITIVE_ORDER.compare(file1.getName(),
+                    file2.getName());
+        }
+    }
+
+    /**
+     * FileTypeComparator
+     * Compare and sort file types - folders first
+     *
+     * @author Aspose Pty Ltd
+     */
+    static class FileTypeComparator implements Comparator<File> {
+
+        /**
+         * Compare two file types
+         *
+         * @param file1
+         * @param file2
+         * @return
+         */
+        @Override
+        public int compare(File file1, File file2) {
+
+            if (file1.isDirectory() && file2.isFile()) {
+                return -1;
+            }
+            if (file1.isDirectory() && file2.isDirectory()) {
+                return 0;
+            }
+            if (file1.isFile() && file2.isFile()) {
+                return 0;
+            }
+            return 1;
+        }
     }
 }

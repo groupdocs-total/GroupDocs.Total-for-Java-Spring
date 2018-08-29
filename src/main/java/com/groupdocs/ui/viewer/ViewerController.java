@@ -8,7 +8,7 @@ import com.groupdocs.ui.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.model.response.LoadedPageEntity;
 import com.groupdocs.ui.model.response.UploadedDocumentEntity;
-import com.groupdocs.ui.util.HttpUtils;
+import com.groupdocs.ui.util.Utils;
 import com.groupdocs.ui.viewer.model.request.RotateDocumentPagesRequest;
 import com.groupdocs.ui.viewer.model.response.RotatedPageEntity;
 import com.groupdocs.viewer.domain.PageData;
@@ -110,7 +110,7 @@ public class ViewerController {
     public void downloadDocument(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
         File file = new File(documentGuid);
         // set response content info
-        HttpUtils.addFileDownloadHeaders(response, file.getName(), file.length());
+        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
         // download the document
         try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
              ServletOutputStream outputStream = response.getOutputStream()) {
@@ -156,7 +156,7 @@ public class ViewerController {
             } else {
                 if (file.exists()){
                     // get file with new name
-                    file = HttpUtils.getFreeFileName(documentStoragePath, fileName);
+                    file = Utils.getFreeFileName(documentStoragePath, fileName);
                 }
                 // save file with out rewriting
                 Files.copy(uploadedInputStream, file.toPath());
