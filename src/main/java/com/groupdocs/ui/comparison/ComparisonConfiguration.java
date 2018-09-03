@@ -1,27 +1,17 @@
 package com.groupdocs.ui.comparison;
 
+import com.groupdocs.ui.config.CommonConfiguration;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "comparison")
-public class ComparisonConfiguration {
+public class ComparisonConfiguration extends CommonConfiguration {
 
-    @Value("${filesDirectory}")
+    @Value("${comparison.filesDirectory}")
     private String filesDirectory;
 
-    @Value("#{new Integer('${preloadPageCount}')}")
-    private Integer preloadPageCount;
-
-    @Value("#{new Boolean('${download}')}")
-    private Boolean download;
-
-    @Value("#{new Boolean('${upload}')}")
-    private Boolean upload;
-
-    @Value("#{new Boolean('${print}')}")
-    private Boolean print;
+    @Value("${comparison.resultDirectory}")
+    private String resultDirectory;
 
     public String getFilesDirectory() {
         return filesDirectory;
@@ -31,36 +21,20 @@ public class ComparisonConfiguration {
         this.filesDirectory = filesDirectory;
     }
 
-    public Integer getPreloadPageCount() {
-        return preloadPageCount;
+    public String getResultDirectory() {
+        return resultDirectory;
     }
 
-    public void setPreloadPageCount(Integer preloadPageCount) {
-        this.preloadPageCount = preloadPageCount;
+    public void setResultDirectory(String resultDirectory) {
+        this.resultDirectory = resultDirectory;
     }
 
-    public Boolean getDownload() {
-        return download;
+    @Override
+    public String toString() {
+        return super.toString() +
+                "ComparisonConfiguration{" +
+                "filesDirectory='" + filesDirectory + '\'' +
+                ", resultDirectory='" + resultDirectory + '\'' +
+                '}';
     }
-
-    public void setDownload(Boolean download) {
-        this.download = download;
-    }
-
-    public Boolean getUpload() {
-        return upload;
-    }
-
-    public void setUpload(Boolean upload) {
-        this.upload = upload;
-    }
-
-    public Boolean getPrint() {
-        return print;
-    }
-
-    public void setPrint(Boolean print) {
-        this.print = print;
-    }
-
 }

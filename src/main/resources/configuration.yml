@@ -120,20 +120,7 @@ signature:
 comparison:
   # Files directory path
   # Absolute path to files directory
-  filesDirectory: /Users/elenko/Documents/tmp/
-  # Default document
-  # Absolute path to default document
-  defaultDocument:
-  # Pages preload
-  # How many pages from a document should be loaded, remaining pages will be loaded on page scrolling
-  # Set 0 to load all pages at once
-  preloadPageCount: 0
-  # Document download
-  # Set false to disable document download
-  download: true
-  # Document upload
-  # Set false to disable document upload
-  upload: true
-  # Document print
-  # Set false to disable document print
-  print: true
+  filesDirectory: C:/GroupDocs/Documents/
+  # FResult files directory path
+  # Absolute path to result files directory
+  resultDirectory: C:/GroupDocs/Documents/

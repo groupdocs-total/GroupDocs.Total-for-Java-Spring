@@ -1,5 +1,7 @@
 package com.groupdocs.ui.comparison;
 
+import com.groupdocs.ui.comparison.model.request.CompareRequest;
+import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
@@ -133,6 +135,40 @@ public class ComparisonController {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/compareWithPaths", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public CompareResultResponse compareWithPaths(@RequestBody CompareRequest compareRequest) {
+        return comparisonService.compare(compareRequest);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/compareFiles",
+            consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public CompareResultResponse compareFiles(@RequestParam("firstFile") MultipartFile firstContent,
+                                               @RequestParam("secondFile") MultipartFile secondContent) {
+        try {
+            return comparisonService.compareFiles(firstContent.getInputStream(), firstContent.getOriginalFilename(), secondContent.getInputStream(), secondContent.getOriginalFilename());
+        } catch (IOException e) {
+            logger.error("Exception occurred while compare files by input streams.");
+            throw new TotalGroupDocsException("Exception occurred while compare files by input streams.", e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/compareWithUrls", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public CompareResultResponse compareWithUrls(@RequestBody CompareRequest compareRequest) {
+        try {
+            String firstPath = compareRequest.getFirstPath();
+            String secondPath = compareRequest.getSecondPath();
+            URL fUrl = URI.create(firstPath).toURL();
+            URL sUrl = URI.create(secondPath).toURL();
+            return comparisonService.compareFiles(fUrl.openStream(), firstPath, sUrl.openStream(), secondPath);
+        } catch (IOException e) {
+            logger.error("Exception occurred while compare files by urls.");
+            throw new TotalGroupDocsException("Exception occurred while compare files by urls.", e);
         }
     }
 }

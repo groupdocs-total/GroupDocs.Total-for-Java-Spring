@@ -18,6 +18,7 @@ var preloadPageCount;
 var currentDirectory;
 var compareFileMap = {};
 var compareFileGuidMap = {};
+var compareFileUrlMap = {};
 var uploadFilesList = [];
 var documentResultGuid;
 var fileNumber;
@@ -128,6 +129,7 @@ $(document).ready(function(){
             let guid = $(this).attr('data-guid');
             compareFileGuidMap[fileNumber] = guid;
             compareFileMap[fileNumber] = {};
+            compareFileUrlMap[fileNumber] = '';
             addFileForComparing(null, guid, fileNumber);
         }
     });
@@ -265,7 +267,77 @@ $(document).ready(function(){
             }
         }
     });
-
+    //////////////////////////////////////////////////
+    // Compare two files event
+    //////////////////////////////////////////////////
+    $('#gd-compare-value').on('click', function () {
+        var context;
+        var contentType = 'application/json';
+        var data;
+        if (compareFileGuidMap['first'] == undefined || compareFileGuidMap['first'] == '') {
+            if (compareFileUrlMap['first'] == undefined || compareFileUrlMap['first'] == '') {
+                data = new FormData();
+                data.append("firstFile", compareFileMap['first']);
+                data.append("secondFile", compareFileMap['second']);
+                context = 'compareFiles';
+                contentType = false;
+            } else {
+                data = JSON.stringify({firstPath: compareFileUrlMap['first'], secondPath: compareFileUrlMap['second']});
+                context = 'compareWithUrls';
+            }
+        } else {
+            data = JSON.stringify({firstPath: compareFileGuidMap['first'], secondPath: compareFileGuidMap['second']});
+            context = 'compareWithPaths';
+        }
+        // show loading spinner
+        $('#gd-modal-spinner').show();
+        // send compare
+        $.ajax({
+            type: 'POST',
+            url: getApplicationPath(context),
+            data: data,
+            contentType: contentType,
+            processData: false,
+            success: function(returnedData) {
+                if(returnedData.message != undefined){
+                    // open error popup
+                    printMessage(returnedData.message);
+                    return;
+                }
+                // hide loading spinner
+                $('#gd-modal-spinner').hide();
+                // append changes
+                $.each(returnedData.changes, function(index, elem){
+                    // change's type
+                    var type = elem.type;
+                    // change's page
+                    var page = elem.page.id;
+                    // change's text
+                    var text = elem.text;
+                    // change's action
+                    var action = elem.action;
+                    // rectangle
+                    var rectangle = {x: elem.x, y: elem.y, width: elem.width, height: elem.height};
+                    // append change's view
+                    $('.gd-result-table tbody').append(
+                        '<tr>'+
+                        /*'<td><i class="fas ' + type + '"></i></td>'+*/
+                        '<td class="gd-change-result">' + page + '<div class="gd-change-text">' + text + '</div></td>'+
+                        '<td>Rectangle: ' + rectangle.x  + '; ' + rectangle.y + '; ' + rectangle.width + '; ' + rectangle.height + '</td>'+
+                        '<td>' + action + '</td>'+
+                        '</tr>');
+                });
+            },
+            error: function(xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                console.log(err.message);
+                // hide loading spinner
+                $('#gd-modal-spinner').hide();
+                // open error popup
+                printMessage(err.message);
+            }
+        });
+    });
     //////////////////////////////////////////////////
     // Open modal dialog (file upload) event
     //////////////////////////////////////////////////
@@ -758,11 +830,15 @@ function addFileForComparing(uploadFiles, url, prefix) {
             '</div>');
         $('#gd-url-wrap-' + prefix).slideUp('fast');
         $('#gd-url-' + prefix).val('');
+        compareFileUrlMap[prefix] = url;
+        compareFileMap[prefix] = {};
+        compareFileGuidMap[prefix] = '';
     } else {
         // append files
         $.each(uploadFiles, function(index, file){
             compareFileMap[prefix] = file;
             compareFileGuidMap[prefix] = '';
+            compareFileUrlMap[prefix] = '';
             // document format
             var docFormat = getDocumentFormat(file.name);
             // convert to proper size
@@ -800,6 +876,7 @@ function addFileForComparing(uploadFiles, url, prefix) {
         // remove file from the files array
         compareFileMap['first'] = {};
         compareFileGuidMap['first'] = '';
+        compareFileUrlMap[prefix] = '';
         // remove table row
         button.closest('div').parent().parent().parent().remove();
         $('#gd-upload-input-first').val('');
@@ -815,6 +892,7 @@ function addFileForComparing(uploadFiles, url, prefix) {
         // remove file from the files array
         compareFileMap['second'] = {};
         compareFileGuidMap['second'] = '';
+        compareFileUrlMap['second'] = '';
         // remove table row
         button.closest('div').parent().parent().parent().remove();
         $('#gd-upload-input-second').val('');
@@ -841,17 +919,17 @@ function addFileForComparing(uploadFiles, url, prefix) {
 /**
  * Upload document
  * @param {file} file - File for uploading
- * @param {String} prefix - first or second document
+ * @param {int} index - Number of the file to upload
  * @param {string} url - URL of the file, set it if URL used instead of file
  */
-function uploadDocument(file, prefix, url = '') {
+function uploadDocument(file, index, url = ''){
     // prepare form data for uploading
     var formData = new FormData();
     // add local file for uploading
     formData.append("file", file);
     // add URL if set
     formData.append("url", url);
-    formData.append("rewrite", false);
+    formData.append("rewrite", rewrite);
     $.ajax({
         // callback function which updates upload progress bar
         xhr: function()
@@ -861,13 +939,14 @@ function uploadDocument(file, prefix, url = '') {
             xhr.upload.addEventListener("progress", function(event){
                 if (event.lengthComputable) {
                     $(".gd-modal-close-action").off('click');
-                    $("#gd-open-document-" + prefix).prop("disabled", true);
+                    $("#gd-open-document").prop("disabled", true);
                     // increase progress
-                    $("#gd-progress-bar-" + prefix).addClass("p"+ Math.round(event.loaded / event.total * 100));
+                    $("#gd-pregress-bar-" + index).addClass("p"+ Math.round(event.loaded / event.total * 100));
                     if(event.loaded == event.total){
-                        $("#gd-progress-bar-" + prefix).fadeOut();
-                        $("#gd-upload-complete-" + prefix).fadeIn();
-                        $("#gd-open-document-" + prefix).prop("disabled", false);
+                        $("#gd-pregress-bar-" + index).fadeOut();
+                        $("#gd-upload-complete-" + index).fadeIn();
+                        $('.gd-modal-close-action').on('click', closeModal);
+                        $("#gd-open-document").prop("disabled", false);
                     }
                 }
             }, false);

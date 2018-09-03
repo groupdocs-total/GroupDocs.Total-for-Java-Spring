@@ -48,6 +48,12 @@
 
         <dependency>
             <groupId>com.groupdocs</groupId>
+            <artifactId>groupdocs-comparison</artifactId>
+            <version>18.6</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.groupdocs</groupId>
             <artifactId>groupdocs-signature</artifactId>
             <version>18.6</version>
             <type>jar</type>
@@ -56,12 +62,6 @@
             <groupId>com.groupdocs</groupId>
             <artifactId>groupdocs-viewer</artifactId>
             <version>17.5.0</version>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>com.groupdocs</groupId>
-            <artifactId>groupdocs-comparison</artifactId>
-            <version>18.6</version>
             <type>jar</type>
         </dependency>
 
