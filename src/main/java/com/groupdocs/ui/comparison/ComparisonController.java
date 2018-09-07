@@ -1,11 +1,13 @@
 package com.groupdocs.ui.comparison;
 
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
+import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
+import com.groupdocs.ui.model.response.LoadedPageEntity;
 import com.groupdocs.ui.model.response.UploadedDocumentEntity;
 import com.groupdocs.ui.util.Utils;
 import org.apache.commons.io.FilenameUtils;
@@ -67,14 +69,22 @@ public class ComparisonController {
 
     /**
      * Download results
+     *
+     * @param documentGuid unique key of results
+     * @param index page number of result images
+     * @param ext results file extension
      */
     @RequestMapping(method = RequestMethod.GET, value = "/downloadDocument")
-    public void downloadDocument(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
-        File file = new File(documentGuid);
+    public void downloadDocument(@RequestParam(name = "guid") String documentGuid,
+                                 @RequestParam(name = "index", required = false) Integer index,
+                                 @RequestParam(name = "ext", required = false) String ext,
+                                 HttpServletResponse response) {
+        String filePath = comparisonService.calculateResultFileName(documentGuid, index, ext);
+        File file = new File(filePath);
         // set response content info
         Utils.addFileDownloadHeaders(response, file.getName(), file.length());
         // download the document
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(filePath));
              ServletOutputStream outputStream = response.getOutputStream()) {
 
             IOUtils.copy(inputStream, outputStream);
@@ -138,37 +148,102 @@ public class ComparisonController {
         }
     }
 
+    /**
+     * Compare files from local storage
+     *
+     * @param compareRequest request with paths to files
+     * @return response with compare results
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/compareWithPaths", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public CompareResultResponse compareWithPaths(@RequestBody CompareRequest compareRequest) {
-        return comparisonService.compare(compareRequest);
+        // check formats
+        if (comparisonService.checkFiles(compareRequest.getFirstPath(), compareRequest.getSecondPath())) {
+            // compare
+            return comparisonService.compare(compareRequest);
+        } else {
+            logger.error("Document types are different");
+            throw new TotalGroupDocsException("Document types are different");
+        }
     }
 
+    /**
+     * Compare documents from form formats
+     *
+     * @param firstContent content of first file
+     * @param secondContent content of second file
+     * @param firstPassword password for first file
+     * @param secondPassword password for second file
+     * @return response with compare results
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/compareFiles",
             consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public CompareResultResponse compareFiles(@RequestParam("firstFile") MultipartFile firstContent,
-                                               @RequestParam("secondFile") MultipartFile secondContent) {
+                                               @RequestParam("secondFile") MultipartFile secondContent,
+                                              @RequestParam("firstPassword") String firstPassword,
+                                              @RequestParam("secondPassword") String secondPassword) {
         try {
-            return comparisonService.compareFiles(firstContent.getInputStream(), firstContent.getOriginalFilename(), secondContent.getInputStream(), secondContent.getOriginalFilename());
+            String firstFileName = firstContent.getOriginalFilename();
+            String secondFileName = secondContent.getOriginalFilename();
+            // check formats
+            if (comparisonService.checkFiles(firstFileName, secondFileName)) {
+                InputStream firstInputStream = firstContent.getInputStream();
+                InputStream secondInputStream = secondContent.getInputStream();
+                // compare files
+                return comparisonService.compareFiles(firstInputStream, firstPassword, secondInputStream, secondPassword, FilenameUtils.getExtension(firstFileName));
+            } else {
+                logger.error("Document types are different");
+                throw new TotalGroupDocsException("Document types are different");
+            }
         } catch (IOException e) {
             logger.error("Exception occurred while compare files by input streams.");
             throw new TotalGroupDocsException("Exception occurred while compare files by input streams.", e);
         }
     }
 
+    /**
+     * Compare two files by urls
+     *
+     * @param compareRequest request with urls to files
+     * @return response with compare results
+     */
     @RequestMapping(method = RequestMethod.POST, value = "/compareWithUrls", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public CompareResultResponse compareWithUrls(@RequestBody CompareRequest compareRequest) {
         try {
             String firstPath = compareRequest.getFirstPath();
             String secondPath = compareRequest.getSecondPath();
-            URL fUrl = URI.create(firstPath).toURL();
-            URL sUrl = URI.create(secondPath).toURL();
-            return comparisonService.compareFiles(fUrl.openStream(), firstPath, sUrl.openStream(), secondPath);
+            // check formats
+            if (comparisonService.checkFiles(firstPath, secondPath)) {
+                URL fUrl = URI.create(firstPath).toURL();
+                URL sUrl = URI.create(secondPath).toURL();
+
+                String firstPassword = compareRequest.getFirstPassword();
+                String secondPassword = compareRequest.getSecondPassword();
+                // open streams for urls
+                try (InputStream firstContent = fUrl.openStream();
+                     InputStream secondContent = sUrl.openStream()) {
+                    // compare
+                    return comparisonService.compareFiles(firstContent, firstPassword, secondContent, secondPassword, FilenameUtils.getExtension(firstPath));
+                }
+            } else {
+                logger.error("Document types are different");
+                throw new TotalGroupDocsException("Document types are different");
+            }
         } catch (IOException e) {
             logger.error("Exception occurred while compare files by urls.");
             throw new TotalGroupDocsException("Exception occurred while compare files by urls.", e);
         }
+    }
+
+    /**
+     * Get result page
+     * @return result page image
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/loadResultPage", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public LoadedPageEntity loadResultPage(@RequestBody LoadResultPageRequest loadResultPageRequest){
+        return comparisonService.loadResultPage(loadResultPageRequest);
     }
 }

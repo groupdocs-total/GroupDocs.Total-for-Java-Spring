@@ -2,16 +2,20 @@ package com.groupdocs.ui.comparison;
 
 import com.google.common.collect.Ordering;
 import com.groupdocs.comparison.Comparer;
+import com.groupdocs.comparison.common.changes.ChangeInfo;
 import com.groupdocs.comparison.common.compareresult.ICompareResult;
 import com.groupdocs.comparison.common.comparisonsettings.ComparisonSettings;
 import com.groupdocs.comparison.common.license.License;
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
+import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
+import com.groupdocs.ui.model.response.LoadedPageEntity;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,16 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.groupdocs.ui.util.Utils.FILE_NAME_COMPARATOR;
 import static com.groupdocs.ui.util.Utils.FILE_TYPE_COMPARATOR;
@@ -37,6 +36,16 @@ import static com.groupdocs.ui.util.Utils.FILE_TYPE_COMPARATOR;
 public class ComparisonServiceImpl implements ComparisonService {
 
     private static final Logger logger = LoggerFactory.getLogger(ComparisonServiceImpl.class);
+    public static final String COMPARE_RESULT = "compareResult";
+    public static final String JPG = "jpg";
+    public static final String DOCX = "docx";
+    public static final String DOC = "doc";
+    public static final String XLS = "xls";
+    public static final String XLSX = "xlsx";
+    public static final String PPT = "ppt";
+    public static final String PPTX = "pptx";
+    public static final String PDF = "pdf";
+    public static final String TXT = "txt";
 
     @Autowired
     private ComparisonConfiguration comparisonConfiguration;
@@ -57,11 +66,18 @@ public class ComparisonServiceImpl implements ComparisonService {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ComparisonConfiguration getComparisonConfiguration() {
         return comparisonConfiguration;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public List<FileDescriptionEntity> loadFiles(FileTreeRequest fileTreeRequest) {
         String currentPath = fileTreeRequest.getPath();
         if (StringUtils.isEmpty(currentPath)) {
@@ -88,6 +104,7 @@ public class ComparisonServiceImpl implements ComparisonService {
             }
             return fileList;
         } catch (Exception ex) {
+            logger.error("Exception occurred while load file tree");
             throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
     }
@@ -96,11 +113,13 @@ public class ComparisonServiceImpl implements ComparisonService {
      * Create file description
      *
      * @param file file
-     * @return signature file description
+     * @return file description
      */
     private FileDescriptionEntity getFileDescriptionEntity(File file) {
         FileDescriptionEntity fileDescription = new FileDescriptionEntity();
+        // set path to file
         fileDescription.setGuid(file.getAbsolutePath());
+        // set file name
         fileDescription.setName(file.getName());
         // set is directory true/false
         fileDescription.setDirectory(file.isDirectory());
@@ -109,49 +128,228 @@ public class ComparisonServiceImpl implements ComparisonService {
         return fileDescription;
     }
 
-    public CompareResultResponse compare(CompareRequest compareRequest) {
-        Comparer comparer = new Comparer();
-        ComparisonSettings settings = new ComparisonSettings();
-
-        ICompareResult compareResult = comparer.compare(compareRequest.getFirstPath(), compareRequest.getSecondPath(), settings);
-
-        CompareResultResponse compareResultResponse = new CompareResultResponse();
-
-        compareResultResponse.setChanges(compareResult.getChanges());
-
-        saveImages(compareResult.getImages(), calculateFileName(compareRequest.getFirstPath(), compareRequest.getSecondPath()));
-
-        return compareResultResponse;
-    }
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public CompareResultResponse compareFiles(InputStream firstContent, String firstUrl, InputStream secondContent, String secondUrl) {
+    public CompareResultResponse compare(CompareRequest compareRequest) {
+        // create new comparer
         Comparer comparer = new Comparer();
+        // create setting for comparing
         ComparisonSettings settings = new ComparisonSettings();
-        CompareResultResponse compareResultResponse = new CompareResultResponse();
 
-        ICompareResult compareResult = comparer.compare(firstContent, secondContent, settings);
+        String firstPath = compareRequest.getFirstPath();
 
-        compareResultResponse.setChanges(compareResult.getChanges());
+        // compare two documents
+        ICompareResult compareResult = comparer.compare(firstPath,
+                convertEmptyPasswordToNull(compareRequest.getFirstPassword()),
+                compareRequest.getSecondPath(),
+                convertEmptyPasswordToNull(compareRequest.getSecondPassword()),
+                settings);
 
-        saveImages(compareResult.getImages(), calculateFileName(firstUrl, secondUrl));
+        // convert results
+        CompareResultResponse compareResultResponse = getCompareResultResponse(compareResult);
+
+        //save all results in file
+        String extension = FilenameUtils.getExtension(firstPath);
+        saveFile(compareResultResponse.getGuid(), null, compareResult.getStream(), extension);
+
+        compareResultResponse.setExtension(extension);
 
         return compareResultResponse;
     }
 
-    private void saveImages(List<InputStream> images, String commonName) {
-        for (int i = 0; i < images.size(); i++) {
-            InputStream image = images.get(i);
-            try {
-                String imageFileName = String.format("%s%scompareResult-%d-%s", comparisonConfiguration.getResultDirectory(), File.separator, new Date().getTime(), commonName);
-                Files.copy(image, Paths.get(imageFileName), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException e) {
-                logger.error("Exception occurred while write result images files.");
-            }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CompareResultResponse compareFiles(InputStream firstContent, String firstPassword, InputStream secondContent, String secondPassword, String fileExt) {
+        // create new comparer
+        Comparer comparer = new Comparer();
+        // create setting for comparing
+        ComparisonSettings settings = new ComparisonSettings();
+
+        // compare two documents
+        ICompareResult compareResult = comparer.compare(firstContent,
+                convertEmptyPasswordToNull(firstPassword),
+                secondContent,
+                convertEmptyPasswordToNull(secondPassword),
+                settings);
+
+        // convert results
+        CompareResultResponse compareResultResponse = getCompareResultResponse(compareResult);
+
+        //save all results in file
+        saveFile(compareResultResponse.getGuid(), null, compareResult.getStream(), fileExt);
+
+        compareResultResponse.setExtension(fileExt);
+
+        return compareResultResponse;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LoadedPageEntity loadResultPage(LoadResultPageRequest loadResultPageRequest) {
+        LoadedPageEntity loadedPage = new LoadedPageEntity();
+
+        // load file with results
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(loadResultPageRequest.getPath()))) {
+
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            // encode ByteArray into String
+            String encodedImage = Base64.getEncoder().encodeToString(bytes);
+            loadedPage.setPageImage(encodedImage);
+
+        } catch (Exception ex) {
+            logger.error("Exception occurred while loading result page", ex);
+            throw new TotalGroupDocsException("Exception occurred while loading result page", ex);
+        }
+
+        return loadedPage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String calculateResultFileName(String documentGuid, Integer index, String ext) {
+        // configure file name for results
+        String resultDirectory = StringUtils.isEmpty(comparisonConfiguration.getResultDirectory()) ? comparisonConfiguration.getFilesDirectory() : comparisonConfiguration.getResultDirectory();
+        String extension = ext != null ? getRightExt(ext) : "";
+        // for images of pages specify index, for all result pages file specify "all" prefix
+        String idx = index == null ? "all." : index.toString() + ".";
+        String suffix = idx + extension;
+        return String.format("%s%s%s-%s-%s", resultDirectory, File.separator, COMPARE_RESULT, documentGuid, suffix);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean checkFiles(String firstFile, String secondFile) {
+        String extension = FilenameUtils.getExtension(firstFile);
+        // check if files extensions are the same and support format file
+        return extension.equals(FilenameUtils.getExtension(secondFile)) && checkSupportedFiles(extension);
+    }
+
+    /**
+     * Replace empty string with null
+     *
+     * @param password
+     * @return password or null if password is empty
+     */
+    private String convertEmptyPasswordToNull(String password) {
+        return StringUtils.isEmpty(password) ? null : password;
+    }
+
+    /**
+     * Check support formats for comparing
+     *
+     * @param extension file extension
+     * @return true - format is supported, false - format is not supported
+     */
+    private boolean checkSupportedFiles(String extension) {
+        switch (extension) {
+            case DOC:
+            case DOCX:
+            case XLS:
+            case XLSX:
+            case PPT:
+            case PPTX:
+            case PDF:
+            case TXT:
+                return true;
+            default:
+                return false;
         }
     }
 
-    private String calculateFileName(String firstName, String secondName) {
-        return FilenameUtils.removeExtension(FilenameUtils.getName(firstName)) + "-" + FilenameUtils.removeExtension(FilenameUtils.getName(secondName));
+    /**
+     * Convert results of comparing and save result files
+     *
+     * @param compareResult results
+     * @return results response
+     */
+    private CompareResultResponse getCompareResultResponse(ICompareResult compareResult) {
+        CompareResultResponse compareResultResponse = new CompareResultResponse();
+
+        // list of changes
+        ChangeInfo[] changes = compareResult.getChanges();
+        compareResultResponse.setChanges(changes);
+
+        String guid = UUID.randomUUID().toString();
+        compareResultResponse.setGuid(guid);
+
+        // if there are changes save images of all pages
+        // unless save only the last page with summary
+        if (changes != null && changes.length > 0) {
+            List<String> pages = saveImages(compareResult.getImages(), guid);
+            // save all pages
+            compareResultResponse.setPages(pages);
+        } else {
+            List<InputStream> images = compareResult.getImages();
+            int last = images.size() - 1;
+            // save only summary page
+            compareResultResponse.setPages(Collections.singletonList(saveFile(guid, last, images.get(last), JPG)));
+        }
+        return compareResultResponse;
+    }
+
+    /**
+     * Save images with results
+     *
+     * @param images list of streams
+     * @param guid   unique key of results
+     * @return list of paths to saved images
+     */
+    private List<String> saveImages(List<InputStream> images, String guid) {
+        List<String> paths = new ArrayList<>(images.size());
+        for (int i = 0; i < images.size(); i++) {
+            paths.add(saveFile(guid, i, images.get(i), JPG));
+        }
+        return paths;
+    }
+
+    /**
+     * Save file
+     *
+     * @param guid        unique key of results
+     * @param pageNumber  result's page number
+     * @param inputStream stream for saving
+     * @param ext         result file extension
+     * @return path to saved file
+     */
+    private String saveFile(String guid, Integer pageNumber, InputStream inputStream, String ext) {
+        String imageFileName = calculateResultFileName(guid, pageNumber, ext);
+        try {
+            Files.copy(inputStream, Paths.get(imageFileName), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Exception occurred while write result images files.");
+        }
+        return imageFileName;
+    }
+
+    /**
+     * Fix file extensions for some formats
+     *
+     * @param ext extension string
+     * @return right extension for result file
+     */
+    private String getRightExt(String ext) {
+        switch (ext) {
+            case DOC:
+            case DOCX:
+                return DOCX;
+            case XLS:
+            case XLSX:
+                return XLSX;
+            case PPT:
+            case PPTX:
+                return PPTX;
+            default:
+                return ext;
+        }
     }
 }

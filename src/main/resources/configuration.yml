@@ -16,7 +16,7 @@ server:
 application:
   # License path
   # Absolute path to GroupDocs license file
-  licensePath:  C:/GroupDocs/Java/Total/GroupDocs.Total.Java.lic
+  licensePath:  C:/GroupDocs/Documents/lic/GroupDocs.Comparison.Java.lic
 
 ################################################
 # Common configurations
@@ -123,4 +123,8 @@ comparison:
   filesDirectory: C:/GroupDocs/Documents/
   # FResult files directory path
   # Absolute path to result files directory
-  resultDirectory: C:/GroupDocs/Documents/
+  resultDirectory: C:/GroupDocs/Documents/compare/
+  # Result pages preload
+  # How many pages from a result document should be loaded, remaining pages will be loaded on page scrolling
+  # Set 0 to load all pages at once
+  preloadResultPageCount: 2

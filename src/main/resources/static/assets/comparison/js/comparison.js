@@ -14,16 +14,20 @@ GLOBAL VARIABLES
 ******************************************************************
 */
 var applicationPath;
-var preloadPageCount;
+var preloadResultPageCount;
 var currentDirectory;
 var compareFileMap = {};
 var compareFileGuidMap = {};
 var compareFileUrlMap = {};
 var uploadFilesList = [];
 var documentResultGuid;
+var extension;
+var changedPages;
+var resultData = [];
 var fileNumber;
 var password = '';
 var map = {};
+var currentPageNumber = 0;
 // add supported formats
 map['folder'] = { 'format': '', 'icon': 'fa-folder' };
 map['pdf'] = { 'format': 'Portable Document Format', 'icon': 'fa-file-pdf' };
@@ -97,12 +101,17 @@ $(document).ready(function(){
     NAV BAR CONTROLS
     ******************************************************************
     */
-
     //////////////////////////////////////////////////
-    // Prevent toggle events on search container click
+    // Toggle navigation dropdown menus
     //////////////////////////////////////////////////
-    $('#gd-nav-search-container').on('click', function(e){
-        e.stopPropagation();
+    $('.gd-nav-toggle').on('click', function(e){
+        if($(this).hasClass('open')){
+            $(this).removeClass('open');
+        }else{
+            $(this).addClass('open');
+        }
+        var nav_drop = getElementByClass($(this), '.gd-nav-dropdown');
+        toggleNavDropdown(nav_drop);
     });
 
     //////////////////////////////////////////////////
@@ -126,10 +135,8 @@ $(document).ready(function(){
             loadFileTree(currentDirectory);
         }else{
             toggleModalDialog(false, '');
-            let guid = $(this).attr('data-guid');
-            compareFileGuidMap[fileNumber] = guid;
-            compareFileMap[fileNumber] = {};
-            compareFileUrlMap[fileNumber] = '';
+            var guid = $(this).attr('data-guid');
+            fillFileVariables(fileNumber, {}, '', guid);
             addFileForComparing(null, guid, fileNumber);
         }
     });
@@ -149,10 +156,13 @@ $(document).ready(function(){
     //////////////////////////////////////////////////
     // Download event
     //////////////////////////////////////////////////
-    $('#gd-btn-download').on('click', function(e){
+    $('#gd-btn-download-all').on('click', function(e){
         downloadDocument();
     });
 
+    $('#gd-btn-download-summary').on('click', function(e){
+        downloadDocument(resultData.length - 1);
+    });
     //////////////////////////////////////////////////
     // Select file for upload event
     //////////////////////////////////////////////////
@@ -171,7 +181,7 @@ $(document).ready(function(){
     });
 
     //////////////////////////////////////////////////
-    // Open URL input event
+    // Open first URL input event
     //////////////////////////////////////////////////
     $('#gd-url-button-first').on('click', function () {
         $('#gd-url-wrap-first').slideDown('fast');
@@ -179,7 +189,7 @@ $(document).ready(function(){
     });
 
     //////////////////////////////////////////////////
-    // Close URL input event
+    // Close first URL input event
     //////////////////////////////////////////////////
     $('#gd-url-cancel-first').on('click', function () {
         $('#gd-url-wrap-first').slideUp('fast');
@@ -187,15 +197,16 @@ $(document).ready(function(){
     });
 
     //////////////////////////////////////////////////
-    // Add file via URL event
+    // Add first file via URL event
     //////////////////////////////////////////////////
     $('#gd-add-url-first').on('click', function () {
+        fillFileVariables('first', {}, url, '');
         addFileForComparing(null, $("#gd-url-first").val(), 'first');
         $('#gd-url-first').val('');
     });
 
     //////////////////////////////////////////////////
-    // Open URL input event
+    // Open second URL input event
     //////////////////////////////////////////////////
     $('#gd-url-button-second').on('click', function () {
         $('#gd-url-wrap-second').slideDown('fast');
@@ -203,7 +214,7 @@ $(document).ready(function(){
     });
 
     //////////////////////////////////////////////////
-    // Close URL input event
+    // Close second URL input event
     //////////////////////////////////////////////////
     $('#gd-url-cancel-second').on('click', function () {
         $('#gd-url-wrap-second').slideUp('fast');
@@ -211,9 +222,10 @@ $(document).ready(function(){
     });
 
     //////////////////////////////////////////////////
-    // Add file via URL event
+    // Add second file via URL event
     //////////////////////////////////////////////////
     $('#gd-add-url-second').on('click', function () {
+        fillFileVariables('second', {}, url, '');
         addFileForComparing(null, $("#gd-url-second").val(), 'second');
         $('#gd-url-second').val('');
     });
@@ -221,8 +233,8 @@ $(document).ready(function(){
     //////////////////////////////////////////////////
     // Print event
     //////////////////////////////////////////////////
-    $('#gd-btn-print').on('click', function(e){
-        printDocument();
+    $('#gd-btn-print').on('click', function(){
+        printResults();
     });
 
     //////////////////////////////////////////////////
@@ -270,27 +282,32 @@ $(document).ready(function(){
     //////////////////////////////////////////////////
     // Compare two files event
     //////////////////////////////////////////////////
-    $('#gd-compare-value').on('click', function () {
+    $('#gd-btn-compare').on('click', function () {
         var context;
         var contentType = 'application/json';
         var data;
+        var firstPass = $('#gd-password-input-first').val();
+        var secondPass = $('#gd-password-input-second').val();
         if (compareFileGuidMap['first'] == undefined || compareFileGuidMap['first'] == '') {
             if (compareFileUrlMap['first'] == undefined || compareFileUrlMap['first'] == '') {
                 data = new FormData();
                 data.append("firstFile", compareFileMap['first']);
                 data.append("secondFile", compareFileMap['second']);
+                data.append("firstPassword", firstPass);
+                data.append("secondPassword", secondPass);
                 context = 'compareFiles';
                 contentType = false;
             } else {
-                data = JSON.stringify({firstPath: compareFileUrlMap['first'], secondPath: compareFileUrlMap['second']});
+                data = JSON.stringify({firstPath: compareFileUrlMap['first'], secondPath: compareFileUrlMap['second'], firstPassword: firstPass, secondPassword: secondPass});
                 context = 'compareWithUrls';
             }
         } else {
-            data = JSON.stringify({firstPath: compareFileGuidMap['first'], secondPath: compareFileGuidMap['second']});
+            data = JSON.stringify({firstPath: compareFileGuidMap['first'], secondPath: compareFileGuidMap['second'], firstPassword: firstPass, secondPassword: secondPass});
             context = 'compareWithPaths';
         }
+        clearResultsContents();
         // show loading spinner
-        $('#gd-modal-spinner').show();
+        $('#gd-compare-spinner').show();
         // send compare
         $.ajax({
             type: 'POST',
@@ -305,39 +322,166 @@ $(document).ready(function(){
                     return;
                 }
                 // hide loading spinner
-                $('#gd-modal-spinner').hide();
-                // append changes
-                $.each(returnedData.changes, function(index, elem){
-                    // change's type
-                    var type = elem.type;
-                    // change's page
-                    var page = elem.page.id;
-                    // change's text
-                    var text = elem.text;
-                    // change's action
-                    var action = elem.action;
-                    // rectangle
-                    var rectangle = {x: elem.x, y: elem.y, width: elem.width, height: elem.height};
-                    // append change's view
-                    $('.gd-result-table tbody').append(
-                        '<tr>'+
-                        /*'<td><i class="fas ' + type + '"></i></td>'+*/
-                        '<td class="gd-change-result">' + page + '<div class="gd-change-text">' + text + '</div></td>'+
-                        '<td>Rectangle: ' + rectangle.x  + '; ' + rectangle.y + '; ' + rectangle.width + '; ' + rectangle.height + '</td>'+
-                        '<td>' + action + '</td>'+
-                        '</tr>');
+                $('#gd-compare-spinner').hide();
+                documentResultGuid = returnedData.guid;
+                extension = returnedData.extension;
+                $.each(returnedData.pages, function(index, elem){
+                    changedPages = elem.page;
                 });
+                var totalPageNumber = returnedData.pages.length;
+                // append changes
+                $.each(returnedData.pages, function(index, elem){
+                    var pageNumber = index;
+
+                    // append empty page
+                    $('#gd-panzoom').append(
+                        '<div id="gd-page-' + pageNumber + '" class="gd-page" class="gd-page">'+
+                        '<div class="gd-page-spinner"><i class="fa fa-circle-o-notch fa-spin"></i> &nbsp;Loading... Please wait.</div>'+
+                        '</div>'
+                    );
+                    // save page data
+                    resultData.push({pageNumber: pageNumber, pageGuid: elem});
+                    setZoomValue(getZoomValue());
+                });
+                var counter = preloadResultPageCount;
+                // check pre-load page number is bigger than total pages number
+                if(preloadResultPageCount > totalPageNumber){
+                    counter = totalPageNumber;
+                }
+                // get page according to the pre-load page number
+                for(var i = 0; i < counter; i++){
+                    // render page
+                    appendHtmlContent(i, resultData[i].pageGuid);
+                }
+
+                // hide delete file icon
+                $('#gd-cancel-button-first').hide();
+                $('#gd-cancel-button-second').hide();
             },
             error: function(xhr, status, error) {
                 var err = eval("(" + xhr.responseText + ")");
                 console.log(err.message);
                 // hide loading spinner
-                $('#gd-modal-spinner').hide();
+                $('#gd-compare-spinner').hide();
                 // open error popup
                 printMessage(err.message);
             }
         });
     });
+    //////////////////////////////////////////////////
+    // Clean current comparison results
+    //////////////////////////////////////////////////
+    $('#gd-btn-clean-compare').on('click', function () {
+        clearFilesRows('first');
+        clearFilesRows('second');
+        clearAndShowSelection('first');
+        clearAndShowSelection('second');
+        clearResultsContents();
+    });
+
+    //////////////////////////////////////////////////
+    // Zoom values event
+    //////////////////////////////////////////////////
+    $('#gd-btn-zoom-value > li').bind('click', function(e){
+        var zoomValue = $(this).text();
+        switch(zoomValue){
+            case 'Fit Width':
+                // get page width
+                var pageWidth = $('.gd-page').width();
+                // get screen width
+                var screenWidth = $('#gd-pages').width();
+                // get scale ratio
+                var scale = (pageWidth / screenWidth) * 100;
+                // set values
+                zoomValue = 200 - scale;
+                break;
+            case 'Fit Height':
+                // get page height
+                var pageHeight = $('.gd-page').height();
+                // get screen height
+                var screenHeight = $('#gd-pages').height();
+                // get scale ratio
+                var scale = (screenHeight / pageHeight) * 100;
+                // set values
+                zoomValue = scale;
+                break;
+            default:
+                zoomValue = zoomValue.slice(0, -1);
+                break;
+        }
+        setZoomValue(zoomValue);
+    });
+
+    //////////////////////////////////////////////////
+    // Zoom in event
+    //////////////////////////////////////////////////
+    $('#gd-btn-zoom-in').on('click', function(e){
+        var zoom_val = getZoomValue();
+        if(zoom_val < 490){
+            zoom_val = zoom_val + 10;
+        }
+        setZoomValue(zoom_val);
+    });
+
+    //////////////////////////////////////////////////
+    // Zoom out event
+    //////////////////////////////////////////////////
+    $('#gd-btn-zoom-out').on('click', function(e){
+        var zoom_val = getZoomValue();
+        if(zoom_val > 30){
+            zoom_val = zoom_val - 10;
+        }
+        setZoomValue(zoom_val);
+    });
+
+    //////////////////////////////////////////////////
+    // Page scrolling event
+    //////////////////////////////////////////////////
+    var previousScroll = 0;
+    $('#gd-pages').scroll(function() {
+        // get last page number
+        var lastPageNumber = resultData.length;
+        // get zoom value
+        var zoomValue = getZoomValue()/100;
+        var pagePosition = 0;
+        // get scroll direction
+        var scrollDown = true;
+        var currentScroll = $(this).scrollTop();
+        if (currentScroll > previousScroll) {
+            pagePosition = currentPageNumber + 1;
+        } else {
+            pagePosition = currentPageNumber - 1;
+            scrollDown = false;
+        }
+        // set scroll direction
+        previousScroll = currentScroll;
+        // check if page is visible in the view port more than 50%
+        if($('#gd-page-' + pagePosition).isOnScreen(0.5, 0.5)){
+            // load next page
+            // to set correct page size we use global array resultData which contains all info about current document
+            if(preloadResultPageCount > 0) {
+                // if scroll down load next page
+                var resultDataPrev = resultData[pagePosition == 0 ? 0 : pagePosition - 1];
+                if(scrollDown){
+                    if(pagePosition < lastPageNumber) {
+                        var resultDatum = resultData[pagePosition];
+                        appendHtmlContent(pagePosition, resultDatum.pageGuid);
+                    } else if(pagePosition == lastPageNumber) {
+                        appendHtmlContent(pagePosition - 1, resultDataPrev.pageGuid);
+                    }
+                } else {
+                    // if scroll up load previous page
+                    if(currentPageNumber >= 0) {
+                        appendHtmlContent(currentPageNumber, resultDataPrev.pageGuid);
+                    }
+                }
+            }
+            if (pagePosition >= 0 && pagePosition < lastPageNumber) {
+                currentPageNumber = pagePosition;
+            }
+        }
+    });
+
     //////////////////////////////////////////////////
     // Open modal dialog (file upload) event
     //////////////////////////////////////////////////
@@ -483,6 +627,109 @@ FUNCTIONS
 ******************************************************************
 */
 
+
+/**
+ * Append html content to an empty page
+ * @param {int} pageNumber - page number
+ * @param {string} path - document guid, path to the file
+ */
+function appendHtmlContent(pageNumber, path) {
+    // initialize data
+    var gd_page = $('#gd-page-' + pageNumber);
+
+    if (!gd_page.hasClass('loaded')) {
+        gd_page.addClass('loaded');
+        // get document description
+        var data = {path: path};
+        $.ajax({
+            type: 'POST',
+            url: getApplicationPath('loadResultPage'),
+            data: JSON.stringify(data),
+            contentType: "application/json",
+            success: function (htmlData) {
+                if (htmlData.error != undefined) {
+                    // open error popup
+                    printMessage(htmlData.error);
+                    return;
+                }
+
+                gd_page.find('.gd-page-spinner').hide();
+
+                // append page image, in image mode append occurred after setting the size to avoid zero size usage
+                gd_page.append('<div class="gd-wrapper">' +
+                    '<image class="gd-page-image" src="data:image/png;base64,' + htmlData.pageImage + '" alt></image>' +
+                    '</div>');
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                console.log(err.message);
+                // open error popup
+                printMessage(err.error);
+            }
+        });
+    }
+}
+
+
+/**
+ * Zoom document
+ * @param {int} zoom_val - zoom value from 0 to 100
+ */
+function setZoomValue(zoom_val){
+    // adapt value for css
+    var zoom_val_non_webkit = zoom_val / 100;
+    var zoom_val_webkit = Math.round(zoom_val) + '%';
+    // display zoom value
+    setNavigationZoomValues(zoom_val_webkit);
+    // set css zoom values
+    var style = [
+        'zoom: ' + zoom_val_webkit,
+        'zoom: ' + zoom_val_non_webkit, // for non webkit browsers
+        '-moz-transform: (' + zoom_val_non_webkit + ', ' + zoom_val_non_webkit + ')' // for mozilla browser
+    ].join(';');
+    // add style
+    $('#gd-panzoom').attr('style', style);
+}
+
+/**
+ * Get currently set zoom value
+ */
+function getZoomValue(){
+    return parseInt($('#gd-zoom-value').text().slice(0, -1));
+}
+
+/**
+ * Clear all result data from previously comparing
+ */
+function clearResultsContents() {
+    // set zoom to default
+    setZoomValue(100);
+    // clear result variables
+    documentResultGuid = '';
+    extension = '';
+    changedPages = [];
+    resultData = [];
+    currentPageNumber = 0;
+    // clear passwords
+    $('#gd-password-input-first').val('');
+    $('#gd-password-input-second').val('');
+    // hide spinner
+    $('#gd-compare-spinner').hide();
+    // remove previously rendered results pages
+    $('#gd-panzoom').html('');
+    // go to top
+    $('#gd-pages').scrollTo(0, {
+        duration: 0
+    });
+}
+
+/**
+ * Set zoom values on navigation panel
+ * @param {int} value - zoom value from 0 to 100
+ */
+function setNavigationZoomValues(value){
+    $('#gd-zoom-value').text(value);
+}
 
 /**
  * Get HTML content for upload modal
@@ -669,7 +916,7 @@ function toggleModalDialog(open, title, content){
 
 /**
  * Clear all data from previously loaded document
- * @param {string} message - message to diplay in popup
+ * @param {string} message - message to display in popup
  */
 function printMessage(message){
     var content = '<div id="gd-modal-error">' + message + '</div>';
@@ -677,12 +924,16 @@ function printMessage(message){
 }
 
 /**
- * Download current document
+ * Download result
+ * @param {index} page number, if undefined, then download all results file
  */
-function downloadDocument() {
-    if(documentResultGuid != "" && typeof documentResultGuid != "undefined"){
+function downloadDocument(index) {
+    if(documentResultGuid != "" && typeof documentResultGuid != "undefined") {
+        var extensionParam = "&ext=" + extension;
+        var imageExtParam = "&ext=jpg";
+        var params = index ? "&index=" + index + imageExtParam : extensionParam;
         // Open download dialog
-        window.location.assign(getApplicationPath('downloadDocument/?path=') + documentResultGuid);
+        window.location.assign(getApplicationPath('downloadDocument/?guid=') + documentResultGuid + params);
     } else {
         // open error popup
         printMessage("Please compare documents first");
@@ -797,8 +1048,28 @@ function closeModal(){
     toggleModalDialog(false, '');
 }
 
-function openBrowseModal(){
-    loadFileTree('');
+/**
+ * Clear results and show selection files
+ *
+ * @param prefix 'first' or 'second' file
+ */
+function clearAndShowSelection(prefix) {
+    // remove file from the files array
+    fillFileVariables(prefix, {}, '', '');
+    $('#gd-upload-input-' + prefix).val('');
+    $('#gd-open-document-' + prefix).show();
+    $("#gd-dropZone-" + prefix).show();
+}
+
+/**
+ * Clear table with selected files
+ * @param prefix 'first' or 'second' file
+ */
+function clearFilesRows(prefix) {
+    var tableRows = $('#gd-upload-files-table-' + prefix + ' > div');
+    for(var n = 0; n < tableRows.length; n++){
+        $(tableRows[n]).remove();
+    }
 }
 
 /**
@@ -820,6 +1091,9 @@ function addFileForComparing(uploadFiles, url, prefix) {
             '<div class="gd-file-name" id="gd-file-name-' + prefix + '">' + url.split('/').pop() + '</div>'+
             '<span id="gd-upload-size"> type: ' + url.split('/').pop().split('.').pop() +'</span>'+
             '</div>'+
+            '<div class="inner-addon left-addon btn gd-password-wrap" id="gd-password-wrap-' + prefix + '">'+
+            '<input type="password" class="form-control" id="gd-password-input-' + prefix + '" placeholder="Enter password">'+
+            '</div>'+
             '</div>'+
             '<div class="swiper-slide gd-desktop swiper-slide-cancel">'+
             '<div class="files-table-remove">'+
@@ -830,15 +1104,10 @@ function addFileForComparing(uploadFiles, url, prefix) {
             '</div>');
         $('#gd-url-wrap-' + prefix).slideUp('fast');
         $('#gd-url-' + prefix).val('');
-        compareFileUrlMap[prefix] = url;
-        compareFileMap[prefix] = {};
-        compareFileGuidMap[prefix] = '';
     } else {
         // append files
         $.each(uploadFiles, function(index, file){
-            compareFileMap[prefix] = file;
-            compareFileGuidMap[prefix] = '';
-            compareFileUrlMap[prefix] = '';
+            fillFileVariables(prefix, file, '', '');
             // document format
             var docFormat = getDocumentFormat(file.name);
             // convert to proper size
@@ -858,6 +1127,9 @@ function addFileForComparing(uploadFiles, url, prefix) {
                 '<span id="gd-upload-size">size: ' + new_size +'</span>'+
                 '<span id="gd-upload-size"> type: ' + file.name.split('.').pop() +'</span>'+
                 '</div>'+
+                '<div class="inner-addon left-addon btn gd-password-wrap" id="gd-password-wrap-' + prefix + '">'+
+                '<input type="password" class="form-control" id="gd-password-input-' + prefix + '" placeholder="Enter password">'+
+                '</div>'+
                 '</div>'+
                 '<div class="swiper-slide gd-desktop swiper-slide-cancel">'+
                 '<div class="files-table-remove">'+
@@ -868,37 +1140,26 @@ function addFileForComparing(uploadFiles, url, prefix) {
                 '</div>');
         });
     }
-    $('#gd-cancel-button-first').on('click', function() {
-        // get selected files
-        var button = $(this);
-        // get file name which will be deleted
-        var fileName = button.closest("div").parent().parent().find("div#gd-file-name-first")[0].innerHTML;
-        // remove file from the files array
-        compareFileMap['first'] = {};
-        compareFileGuidMap['first'] = '';
-        compareFileUrlMap[prefix] = '';
-        // remove table row
-        button.closest('div').parent().parent().parent().remove();
-        $('#gd-upload-input-first').val('');
-        $('#gd-open-document-first').show();
-        $("#gd-dropZone-first").show();
-    });
 
-    $('#gd-cancel-button-second').on('click', function(){
-        // get selected files
-        var button = $(this);
-        // get file name which will be deleted
-        var fileName = button.closest("div").parent().parent().find("div#gd-file-name-second")[0].innerHTML;
-        // remove file from the files array
-        compareFileMap['second'] = {};
-        compareFileGuidMap['second'] = '';
-        compareFileUrlMap['second'] = '';
-        // remove table row
-        button.closest('div').parent().parent().parent().remove();
-        $('#gd-upload-input-second').val('');
-        $('#gd-open-document-second').show();
-        $("#gd-dropZone-second").show();
-    });
+    if ('first' == prefix) {
+        $('#gd-cancel-button-first').on('click', function() {
+            // get selected files
+            var button = $(this);
+            // remove table row
+            button.closest('div').parent().parent().parent().remove();
+
+            clearAndShowSelection('first');
+        });
+    } else {
+        $('#gd-cancel-button-second').on('click', function(){
+            // get selected files
+            var button = $(this);
+            // remove table row
+            button.closest('div').parent().parent().parent().remove();
+
+            clearAndShowSelection('second');
+        });
+    }
 
     $("#gd-dropZone-" + prefix).hide();
 
@@ -914,6 +1175,20 @@ function addFileForComparing(uploadFiles, url, prefix) {
             $(slide).removeClass("swiper-slide-cancel");
         });
     }
+}
+
+/**
+ * Fill variables with data of first or second files
+ *
+ * @param prefix 'first' or 'second'
+ * @param file file data
+ * @param url url to file
+ * @param path path to file
+ */
+function fillFileVariables(prefix, file, url, path) {
+    compareFileMap[prefix] = file;
+    compareFileGuidMap[prefix] = path;
+    compareFileUrlMap[prefix] = url;
 }
 
 /**
@@ -975,9 +1250,9 @@ function uploadDocument(file, index, url = ''){
 }
 
 /**
- * Print current document
+ * Print results
  */
-function printDocument(){
+function printResults(){
     // get current document content
     var documentContainer = $("#gd-panzoom");
     // force each document page to be printed as a new page
@@ -985,7 +1260,7 @@ function printDocument(){
         '@media print'+
         '{.gd-wrapper {page-break-after:always;}';
     // set correct page orientation if page were rotated
-    documentContainer.find(".gd-page").each(function(index, page){
+    documentContainer.find(".gd-page").each(function(index, page) {
         if($(page).css("transform") != "none"){
             cssPrint = cssPrint + "#" + $(page).attr("id") + "{transform: rotate(0deg) !important;}";
         }
@@ -1008,27 +1283,6 @@ function printDocument(){
  */
 function closeModal(){
     toggleModalDialog(false, '');
-}
-
-/**
- * Open password modal
- * @param {string} error - error message
- **/
-function openPasswordModal(error){
-    var passwordSection = '<section id="gd-password-section" class="tab-slider-body">'+
-        '<div class="inner-addon left-addon btn gd-password-wrap" id="gd-password-wrap">'+
-        '<input type="password" class="form-control" id="gd-password-input" placeholder="Enter password">'+
-        '<button class="btn btn-primary" id="gd-password-submit">Submit</button>'+
-        '<span class="gd-password-error" style="display: none;"></span>'+
-        '</div>'+
-        '</section>';
-    toggleModalDialog(true, 'Password required', passwordSection);
-    if(error != "" && typeof error != "undefined"){
-        $(".gd-password-error")[0].innerHTML = error;
-        $(".gd-password-error").show();
-    } else {
-        $(".gd-password-error").hide();
-    }
 }
 
 /**
@@ -1063,8 +1317,8 @@ function getHtmlFileBrowser(){
  * Get HTML content for drag and drop area
  **/
 function getHtmlDragAndDropArea(prefix){
-    // upload section
-    var uploadSection = '<section id="gd-upload-section-' + prefix + '" class="tab-slider-body">'+
+    // grag and grop section
+    var htmlSection = '<section id="gd-upload-section-' + prefix + '" class="tab-slider-body">'+
         '<div class="gd-drag-n-drop-wrap-compare" id="gd-dropZone-' + prefix + '">'+
         '<div class="gd-drag-n-drop-icon"><i class="fas fa-cloud-download-alt fa-5x" aria-hidden="true"></i></div>'+
         '<h2>Drag &amp; Drop the ' + prefix + ' file here</h2>'+
@@ -1092,7 +1346,34 @@ function getHtmlDragAndDropArea(prefix){
         '<div class="gd-browse-document gd-modal-buttons" id="gd-open-document-' + prefix + '">'+
         '<i class="fas fa-folder-open"></i>BROWSE files'+
         '</section>';
-    return uploadSection;
+    return htmlSection;
+}
+
+/**
+ * Toggle top navigation menus zoom
+ * @param {object} target - dropdown target to be opened/closed
+ */
+function toggleNavDropdown(target){
+    var isOpened = target.hasClass('opened');
+    if(!isOpened){
+        $(target).addClass('opened');
+        $(target)
+            .css('opacity', 0)
+            .slideDown('fast')
+            .animate(
+                { opacity: 1 },
+                { queue: false, duration: 'fast' }
+            );
+    }else{
+        $(target).removeClass('opened');
+        $(target)
+            .css('opacity', 1)
+            .slideUp('fast')
+            .animate(
+                { opacity: 0 },
+                { queue: false, duration: 'fast' }
+            );
+    }
 }
 
 /*
@@ -1120,7 +1401,8 @@ GROUPDOCS.COMAPRISON PLUGIN
             // set defaults
             var defaults = {
                 applicationPath: null,
-                preloadPageCount: 1,
+                preloadResultPageCount: 1,
+                zoom : true,
                 download: true,
                 upload: true,
                 print: true,
@@ -1129,7 +1411,7 @@ GROUPDOCS.COMAPRISON PLUGIN
 
             // set global option params
             applicationPath = options.applicationPath;
-            preloadPageCount = options.preloadPageCount;
+            preloadResultPageCount = options.preloadResultPageCount;
 
             // assembly html base
             this.append(getHtmlBase);
@@ -1149,6 +1431,10 @@ GROUPDOCS.COMAPRISON PLUGIN
             }
             if(options.print){
                 $(gd_navbar).append(getHtmlNavPrintPanel);
+                $(gd_navbar).append(getHtmlNavSplitter);
+            }
+            if(options.zoom){
+                $(gd_navbar).append(getHtmlNavZoomPanel);
                 $(gd_navbar).append(getHtmlNavSplitter);
             }
 
@@ -1242,10 +1528,16 @@ GROUPDOCS.COMAPRISON PLUGIN
     ******************************************************************
     */
     function getHtmlComparisonPanel(){
-        return '<li class="gd-nav-toggle">'+
+        return '<li id="gd-btn-compare" class="gd-btn-compare">'+
             '<span id="gd-compare-value">' +
             '<i class="fas fa-book-open"></i>'+
             '<span class="gd-tooltip">Compare</span>'+
+            '</span>'+
+            '</li>'+
+            '<li id="gd-btn-clean-compare" class="gd-btn-clean-compare">'+
+            '<span id="gd-clean-compare">' +
+            '<i class="fas fa-trash-alt"></i>'+
+            '<span class="gd-tooltip">Clean comparing</span>'+
             '</span>'+
             '</li>';
     }
@@ -1265,10 +1557,15 @@ GROUPDOCS.COMAPRISON PLUGIN
             // nav bar END
             '</div>'+
             // header END
-
+            '<div id="gd-select-compare-files">'+
+                getHtmlDragAndDropArea('first') + getHtmlDragAndDropArea('second') +
+            '</div>'+
             // pages BEGIN
             '<div id="gd-pages">'+
-            getHtmlDragAndDropArea('first') + getHtmlDragAndDropArea('second') +
+                '<div id="gd-compare-spinner" style="display: none;"><i class="fas fa-circle-notch fa-spin"></i> &nbsp;Comparing... Please wait.</div>'+
+                '<div id="gd-panzoom">'+
+                // list of pages
+                '</div>'+
             '</div>'+
             '</div>'+
             // pages END
@@ -1303,8 +1600,18 @@ GROUPDOCS.COMAPRISON PLUGIN
         return '<li class="gd-nav-separator" role="separator"></li>';
     }
 
-    function getHtmlNavDownloadPanel(){
-        return '<li id="gd-btn-download"><i class="fas fa-download"></i><span class="gd-tooltip">Download</span></li>';
+    function getHtmlNavDownloadPanel() {
+        return '<li class="gd-nav-toggle" id="gd-download-val-container">'+
+            '<span id="gd-download-value">' +
+            '<i class="fa fa-download"></i>' +
+            '<span class="gd-tooltip">Download</span>' +
+            '</span>'+
+            '<span class="gd-nav-caret"></span>'+
+            '<ul class="gd-nav-dropdown-menu gd-nav-dropdown" id="gd-btn-download-value">'+
+                '<li id="gd-btn-download-all">Download All</li>' +
+                '<li id="gd-btn-download-summary">Download Summary</li>' +
+            '</ul>'+
+            '</li>';
     }
 
     function getHtmlNavPrintPanel(){
@@ -1314,7 +1621,113 @@ GROUPDOCS.COMAPRISON PLUGIN
     function getHtmlNavUploadPanel(){
         return '<li id="gd-btn-upload"><i class="fas fa-upload"></i><span class="gd-tooltip">Upload</span></li>';
     }
+
+    function getHtmlNavZoomPanel(){
+        return '<li class="gd-nav-toggle" id="gd-zoom-val-container">'+
+            '<span id="gd-zoom-value">100%</span>'+
+            '<span class="gd-nav-caret"></span>'+
+            '<ul class="gd-nav-dropdown-menu gd-nav-dropdown" id="gd-btn-zoom-value">'+
+            '<li>25%</li>'+
+            '<li>50%</li>'+
+            '<li>100%</li>'+
+            '<li>150%</li>'+
+            '<li>200%</li>'+
+            '<li>300%</li>'+
+            '<li role="separator" class="gd-nav-dropdown-menu-separator"></li>'+
+            '<li>Fit Width</li>'+
+            '<li>Fit Height</li>'+
+            '</ul>'+
+            '</li>'+
+            '<li id="gd-btn-zoom-in">'+
+            '<i class="fa fa-search-plus"></i>'+
+            '<span class="gd-tooltip">Zoom In</span>'+
+            '</li>'+
+            '<li id="gd-btn-zoom-out">'+
+            '<i class="fa fa-search-minus"></i>'+
+            '<span class="gd-tooltip">Zoom Out</span>'+
+            '</li>';
+    }
+
 })(jQuery);
+
+/*
+******************************************************************
+******************************************************************
+JQUERY SCROLL TO PLUGIN
+******************************************************************
+******************************************************************
+*/
+$.fn.scrollTo = function( target, options, callback ){
+    if(typeof options == 'function' && arguments.length == 2){ callback = options; options = target; }
+    var settings = $.extend({
+        scrollTarget : target,
+        offsetTop    : 50,
+        duration     : 500,
+        zoom         : 100,
+        easing       : 'swing'
+    }, options);
+    return this.each(function(){
+        var scrollPane = $(this);
+        var scrollTarget = (typeof settings.scrollTarget == "number") ? settings.scrollTarget : $(settings.scrollTarget);
+        if(typeof settings.scrollTarget != "number"){
+            var scrollYTop = scrollTarget.offset().top * settings.zoom / 100;
+        }
+        var scrollY = (typeof scrollTarget == "number") ? scrollTarget : scrollYTop + scrollPane.scrollTop() - parseInt(settings.offsetTop);
+        scrollPane.animate({scrollTop : scrollY }, parseInt(settings.duration), settings.easing, function(){
+            if (typeof callback == 'function') {
+                callback.call(this);
+            }
+        });
+    });
+}
+
+/*
+******************************************************************
+******************************************************************
+JQUERY CHECK IF IN VIEWPORT PLUGIN
+******************************************************************
+******************************************************************
+*/
+$.fn.isOnScreen = function(x, y){
+
+    if(x == null || typeof x == 'undefined') x = 1;
+    if(y == null || typeof y == 'undefined') y = 1;
+
+    var win = $(window);
+
+    var viewport = {
+        top : win.scrollTop(),
+        left : win.scrollLeft()
+    };
+    viewport.right = viewport.left + win.width();
+    viewport.bottom = viewport.top + win.height();
+
+    var height = this.outerHeight();
+    var width = this.outerWidth();
+
+    if(!width || !height){
+        return false;
+    }
+
+    var bounds = this.offset();
+    bounds.right = bounds.left + width;
+    bounds.bottom = bounds.top + height;
+
+    var visible = (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+
+    if(!visible){
+        return false;
+    }
+
+    var deltas = {
+        top : Math.min( 1, ( bounds.bottom - viewport.top ) / height),
+        bottom : Math.min(1, ( viewport.bottom - bounds.top ) / height),
+        left : Math.min(1, ( bounds.right - viewport.left ) / width),
+        right : Math.min(1, ( viewport.right - bounds.left ) / width)
+    };
+
+    return (deltas.left * deltas.right) >= x && (deltas.top * deltas.bottom) >= y;
+};
 
 /*
 ******************************************************************

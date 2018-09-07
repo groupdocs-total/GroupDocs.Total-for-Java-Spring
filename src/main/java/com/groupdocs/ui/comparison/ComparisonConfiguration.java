@@ -13,6 +13,9 @@ public class ComparisonConfiguration extends CommonConfiguration {
     @Value("${comparison.resultDirectory}")
     private String resultDirectory;
 
+    @Value("#{new Integer('${comparison.preloadResultPageCount}')}")
+    private Integer preloadResultPageCount;
+
     public String getFilesDirectory() {
         return filesDirectory;
     }
@@ -29,12 +32,21 @@ public class ComparisonConfiguration extends CommonConfiguration {
         this.resultDirectory = resultDirectory;
     }
 
+    public Integer getPreloadResultPageCount() {
+        return preloadResultPageCount;
+    }
+
+    public void setPreloadResultPageCount(Integer preloadResultPageCount) {
+        this.preloadResultPageCount = preloadResultPageCount;
+    }
+
     @Override
     public String toString() {
         return super.toString() +
                 "ComparisonConfiguration{" +
                 "filesDirectory='" + filesDirectory + '\'' +
                 ", resultDirectory='" + resultDirectory + '\'' +
+                ", preloadResultPageCount=" + preloadResultPageCount +
                 '}';
     }
 }

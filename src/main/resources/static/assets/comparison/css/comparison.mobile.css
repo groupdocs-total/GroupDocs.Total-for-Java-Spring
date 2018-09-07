@@ -38,6 +38,11 @@
         width: 80%;
     }
 
+    #gd-select-compare-files section {
+        padding: 20px 20px 20px;
+        width: 100%;
+    }
+
     #gd-pages section {
         padding: 20px 20px 20px;
         width: 100%;

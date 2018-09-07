@@ -1,20 +1,78 @@
 package com.groupdocs.ui.comparison;
 
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
+import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
 import com.groupdocs.ui.model.request.FileTreeRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
+import com.groupdocs.ui.model.response.LoadedPageEntity;
 
 import java.io.InputStream;
 import java.util.List;
 
 public interface ComparisonService {
 
+    /**
+     * Get configuration
+     *
+     * @return configuration
+     */
     ComparisonConfiguration getComparisonConfiguration();
 
+    /**
+     * Load list of elements from directory
+     *
+     * @param fileTreeRequest request with path to directory
+     * @return list of files and folders
+     */
     List<FileDescriptionEntity> loadFiles(FileTreeRequest fileTreeRequest);
 
+    /**
+     * Compare two documents, save results in files,
+     * return result descriptions and paths to result files
+     *
+     * @param compareRequest request with paths to documents to compare
+     * @return comparing results
+     */
     CompareResultResponse compare(CompareRequest compareRequest);
 
-    CompareResultResponse compareFiles(InputStream firstContent, String firstUrl, InputStream secondContent, String secondUrl);
+    /**
+     * Compare two documents, save results in files,
+     * return result descriptions and paths to result files
+     *
+     * @param firstContent stream for first document
+     * @param firstPassword
+     * @param secondContent stream for second document
+     * @param secondPassword
+     * @param fileExt file extension (for saving result file)
+     * @return comparing results
+     */
+    CompareResultResponse compareFiles(InputStream firstContent, String firstPassword, InputStream secondContent, String secondPassword, String fileExt);
+
+    /**
+     * Load the page of results
+     *
+     * @param loadResultPageRequest request with path to page result
+     * @return page result data
+     */
+    LoadedPageEntity loadResultPage(LoadResultPageRequest loadResultPageRequest);
+
+    /**
+     * Produce file names for results
+     *
+     * @param documentGuid unique key of results
+     * @param index page number, if it is null, return file name for all-pages result file
+     * @param ext result file extension
+     * @return full path for result file
+     */
+    String calculateResultFileName(String documentGuid, Integer index, String ext);
+
+    /**
+     * Check format files for comparing
+     *
+     * @param firstFileName first file name
+     * @param secondFileName second file name
+     * @return true - formats of the both files are the same and format is supported, false - other
+     */
+    boolean checkFiles(String firstFileName, String secondFileName);
 }
