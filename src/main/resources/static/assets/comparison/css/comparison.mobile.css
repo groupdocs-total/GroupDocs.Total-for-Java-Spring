@@ -31,7 +31,6 @@
 
     #gd-upload-files-table-first, #gd-upload-files-table-second {
         width: calc(100% - 20px);
-        margin: 20px 10px;
     }
 
     .swiper-slide-comparison {
@@ -39,7 +38,6 @@
     }
 
     #gd-select-compare-files section {
-        padding: 20px 20px 20px;
         width: 100%;
     }
 
@@ -64,7 +62,7 @@
     }
 
     #gd-upload-files-table-first > div {
-        height: 185px !important;
+        height: 275px !important;
     }
 
     #gd-upload-files-table-first div > i {
@@ -75,10 +73,21 @@
     #gd-upload-files-table-first .gd-filetree-name {
         top: 55px;
         left: 75px;
-        width: calc(100% - 285px);
+        width: 100%;
     }
 
     #gd-upload-files-table-first .gd-filetree-name > span {
+        font-size: 30px;
+        padding-left: 0;
+    }
+
+    #gd-upload-files-table-second .gd-filetree-name {
+        top: 55px;
+        left: 75px;
+        width: 100%;
+    }
+
+    #gd-upload-files-table-second .gd-filetree-name > span {
         font-size: 30px;
         padding-left: 0;
     }
@@ -99,7 +108,7 @@
     }
 
     #gd-upload-files-table-second > div {
-        height: 185px !important;
+        height: 275px !important;
     }
 
     #gd-upload-files-table-second div > i {
@@ -107,14 +116,23 @@
         top: 72px !important;
     }
 
-    #gd-upload-files-table-second .gd-filetree-name {
-        top: 55px;
-        left: 75px;
-        width: calc(100% - 285px);
+    #gd-navbar {
+        overflow-x: scroll;
     }
 
-    #gd-upload-files-table-second .gd-filetree-name > span {
-        font-size: 30px;
-        padding-left: 0;
+    #gd-select-compare-files {
+        padding-top: 100px;
+        overflow-y: scroll;
+        height: 100%;
+        display: block;
+    }
+
+    .gd-password-wrap {
+        position: relative;
+        margin-top: 150px !important;
+    }
+
+    #gd-navbar > li {
+        padding: 15px 15px;
     }
 }

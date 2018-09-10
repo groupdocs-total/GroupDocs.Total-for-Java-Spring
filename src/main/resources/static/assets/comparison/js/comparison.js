@@ -200,8 +200,9 @@ $(document).ready(function(){
     // Add first file via URL event
     //////////////////////////////////////////////////
     $('#gd-add-url-first').on('click', function () {
+        var url = $("#gd-url-first").val();
         fillFileVariables('first', {}, url, '');
-        addFileForComparing(null, $("#gd-url-first").val(), 'first');
+        addFileForComparing(null, url, 'first');
         $('#gd-url-first').val('');
     });
 
@@ -225,8 +226,9 @@ $(document).ready(function(){
     // Add second file via URL event
     //////////////////////////////////////////////////
     $('#gd-add-url-second').on('click', function () {
+        var url = $("#gd-url-second").val();
         fillFileVariables('second', {}, url, '');
-        addFileForComparing(null, $("#gd-url-second").val(), 'second');
+        addFileForComparing(null, url, 'second');
         $('#gd-url-second').val('');
     });
 
