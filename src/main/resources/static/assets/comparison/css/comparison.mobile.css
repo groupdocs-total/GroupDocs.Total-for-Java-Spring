@@ -6,13 +6,6 @@
         height: auto;
     }
 
-    #gd-url-button-first, #gd-url-button-second {
-        width: 46%;
-        height: 77px;
-        margin: 0 10px;
-        font-size: -webkit-xxx-large;
-    }
-
     #gd-add-url-first, #gd-add-url-second {
         right: -7px;
         height: 89px;
@@ -46,74 +39,36 @@
         width: 100%;
     }
 
-    #gd-upload-section-first label {
-        width: calc(50% - 20px);
-        height: 77px;
-        font-size: 26px;
-        padding-top: 18px;
-    }
-
-    #gd-upload-section-first label > i {
-        font-size: 26px;
-    }
-
-    #gd-upload-section-first div {
+    #gd-upload-section-first div, #gd-upload-section-second div {
         font-size: 38px;
     }
 
-    #gd-upload-files-table-first > div {
+    #gd-upload-files-table-first > div, #gd-upload-files-table-second > div {
         height: 275px !important;
     }
 
-    #gd-upload-files-table-first div > i {
+    .gd-upload-files-table-i {
         font-size: 40px !important;
         top: 72px !important;
     }
 
-    #gd-upload-files-table-first .gd-filetree-name {
+    .gd-filetree-name-compare {
         top: 55px;
         left: 75px;
         width: 100%;
     }
 
-    #gd-upload-files-table-first .gd-filetree-name > span {
+    .gd-filetree-name-compare > span {
         font-size: 30px;
         padding-left: 0;
     }
 
-    #gd-upload-files-table-second .gd-filetree-name {
-        top: 55px;
-        left: 75px;
-        width: 100%;
-    }
-
-    #gd-upload-files-table-second .gd-filetree-name > span {
-        font-size: 30px;
-        padding-left: 0;
-    }
-
-    #gd-upload-section-second label {
-        width: calc(50% - 20px);
-        height: 77px;
-        font-size: 26px;
+    .gd-upload-section-label {
         padding-top: 18px;
     }
 
-    #gd-upload-section-second label > i {
+    .gd-upload-section-label > i {
         font-size: 26px;
-    }
-
-    #gd-upload-section-second div {
-        font-size: 38px;
-    }
-
-    #gd-upload-files-table-second > div {
-        height: 275px !important;
-    }
-
-    #gd-upload-files-table-second div > i {
-        font-size: 40px !important;
-        top: 72px !important;
     }
 
     #gd-navbar {
@@ -134,5 +89,19 @@
 
     #gd-navbar > li {
         padding: 15px 15px;
+    }
+
+    .gd-drag-n-drop-buttons .btn {
+        width: calc(50% - 20px);
+        height: 77px;
+        font-size: 26px;
+    }
+
+    #gd-modal-error {
+        font-size: 38px;
+    }
+
+    .gd-modal-title {
+        font-size: 42px;
     }
 }

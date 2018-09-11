@@ -28,6 +28,7 @@ var fileNumber;
 var password = '';
 var map = {};
 var currentPageNumber = 0;
+var rewrite;
 // add supported formats
 map['folder'] = { 'format': '', 'icon': 'fa-folder' };
 map['pdf'] = { 'format': 'Portable Document Format', 'icon': 'fa-file-pdf' };
@@ -540,6 +541,7 @@ $(document).ready(function(){
         for(var n = 0; n < tableRows.length; n++){
             $(tableRows[n]).find('div.gd-pregress').attr('id', 'gd-pregress-bar-' + n);
             $(tableRows[n]).find("div.gd-upload-complete").attr('id', 'gd-upload-complete-' + n);
+            $(tableRows[n]).find("div.gd-upload-complete-fail").attr('id', 'gd-upload-failure-' + n);
         }
         // if table is empty disable upload button
         if(tableRows.length == 0){
@@ -969,7 +971,8 @@ function addFileForUploading(uploadFiles, url) {
             '<div class="fill"></div>'+
             '</div>'+
             '</div>'+
-            '<div id="gd-upload-complete-' + tableRowsNumber + '" class="gd-upload-complete"><i class="fa fa-check-circle-o"></i></div>'+
+            '<div id="gd-upload-complete-' + tableRowsNumber + '" class="gd-upload-complete"><i class="fa fa-check-circle"></i></div>'+
+            '<div id="gd-upload-failure-' + tableRowsNumber + '" class="gd-upload-complete-fail"><i class="fa fa-exclamation-circle"></i></div>'+
             '</div>'+
             '<div class="swiper-slide gd-desktop swiper-slide-cancel">'+
             '<div class="files-table-remove">'+
@@ -1009,7 +1012,8 @@ function addFileForUploading(uploadFiles, url) {
                 '<div class="fill"></div>'+
                 '</div>'+
                 '</div>'+
-                '<div id="gd-upload-complete-' + tableRowsNumber + '" class="gd-upload-complete"><i class="fa fa-check-circle-o"></i></div>'+
+                '<div id="gd-upload-complete-' + tableRowsNumber + '" class="gd-upload-complete"><i class="fa fa-check-circle"></i></div>'+
+                '<div id="gd-upload-failure-' + tableRowsNumber + '" class="gd-upload-complete-fail"><i class="fa fa-exclamation-circle"></i></div>'+
                 '</div>'+
                 '<div class="swiper-slide gd-desktop swiper-slide-cancel">'+
                 '<div class="files-table-remove">'+
@@ -1088,8 +1092,8 @@ function addFileForComparing(uploadFiles, url, prefix) {
         table.append('<div class="swiper-container" id="swiper-container-' + prefix + '">'+
             '<div class="swiper-wrapper">'+
             '<div class="swiper-slide swiper-slide-comparison">'+
-            '<i class="fas ' + getDocumentFormat(url.split('/').pop()).icon + '"></i>'+
-            '<div class="gd-filetree-name" data-uploaded="false" data-value="' + url + '">'+
+            '<i class="fas gd-upload-files-table-i ' + getDocumentFormat(url.split('/').pop()).icon + '"></i>'+
+            '<div class="gd-filetree-name-compare" data-uploaded="false" data-value="' + url + '">'+
             '<div class="gd-file-name" id="gd-file-name-' + prefix + '">' + url.split('/').pop() + '</div>'+
             '<span id="gd-upload-size"> type: ' + url.split('/').pop().split('.').pop() +'</span>'+
             '</div>'+
@@ -1123,8 +1127,8 @@ function addFileForComparing(uploadFiles, url, prefix) {
             table.append('<div class="swiper-container" id="swiper-container-' + prefix + '">'+
                 '<div class="swiper-wrapper">'+
                 '<div class="swiper-slide swiper-slide-comparison">'+
-                '<i class="fas ' + docFormat.icon + '"></i>'+
-                '<div class="gd-filetree-name" data-uploaded="false">'+
+                '<i class="fas gd-upload-files-table-i ' + docFormat.icon + '"></i>'+
+                '<div class="gd-filetree-name-compare" data-uploaded="false">'+
                 '<div class="gd-file-name" id="gd-file-name-' + prefix + '">' + file.name + '</div>'+
                 '<span id="gd-upload-size">size: ' + new_size +'</span>'+
                 '<span id="gd-upload-size"> type: ' + file.name.split('.').pop() +'</span>'+
@@ -1239,6 +1243,8 @@ function uploadDocument(file, index, url = ''){
             if(returnedData.message != undefined){
                 // open error popup
                 printMessage(returnedData.message);
+                $("#gd-upload-complete-" + index).fadeOut();
+                $("#gd-upload-failure-" + index).fadeIn();
                 return;
             }
         },
@@ -1247,6 +1253,8 @@ function uploadDocument(file, index, url = ''){
             console.log(err.message);
             // open error popup
             printMessage(err.message);
+            $("#gd-upload-complete-" + index).fadeOut();
+            $("#gd-upload-failure-" + index).fadeIn();
         }
     });
 }
@@ -1326,12 +1334,12 @@ function getHtmlDragAndDropArea(prefix){
         '<h2>Drag &amp; Drop the ' + prefix + ' file here</h2>'+
         '<h4>OR</h4>'+
         '<div class="gd-drag-n-drop-buttons">'+
-        '<label class="btn btn-primary">'+
+        '<label class="btn btn-primary gd-upload-section-label">'+
         '<i class="fas fa-file"></i>'+
         'SELECT FILE'+
         '<input id="gd-upload-input-' + prefix + '" type="file" multiple style="display: none;">'+
         '</label>'+
-        '<label class="btn" id="gd-url-button-' + prefix + '">'+
+        '<label class="btn gd-upload-section-label" id="gd-url-button-' + prefix + '">'+
         '<i class="fas fa-link"></i>'+
         'URL'+
         '</label>'+
@@ -1408,12 +1416,14 @@ GROUPDOCS.COMAPRISON PLUGIN
                 download: true,
                 upload: true,
                 print: true,
+                rewrite: true
             };
             options = $.extend(defaults, options);
 
             // set global option params
             applicationPath = options.applicationPath;
             preloadResultPageCount = options.preloadResultPageCount;
+            rewrite = options.rewrite;
 
             // assembly html base
             this.append(getHtmlBase);
@@ -1610,7 +1620,7 @@ GROUPDOCS.COMAPRISON PLUGIN
             '</span>'+
             '<span class="gd-nav-caret"></span>'+
             '<ul class="gd-nav-dropdown-menu gd-nav-dropdown" id="gd-btn-download-value">'+
-                '<li id="gd-btn-download-all">Download All</li>' +
+                '<li id="gd-btn-download-all">Download All Results</li>' +
                 '<li id="gd-btn-download-summary">Download Summary</li>' +
             '</ul>'+
             '</li>';
