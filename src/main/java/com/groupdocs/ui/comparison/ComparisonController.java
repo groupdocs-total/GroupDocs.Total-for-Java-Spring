@@ -180,7 +180,7 @@ public class ComparisonController {
             consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody
     public CompareResultResponse compareFiles(@RequestParam("firstFile") MultipartFile firstContent,
-                                               @RequestParam("secondFile") MultipartFile secondContent,
+                                              @RequestParam("secondFile") MultipartFile secondContent,
                                               @RequestParam("firstPassword") String firstPassword,
                                               @RequestParam("secondPassword") String secondPassword) {
         try {
