@@ -133,19 +133,25 @@ public class ComparisonServiceImpl implements ComparisonService {
      */
     @Override
     public CompareResultResponse compare(CompareRequest compareRequest) {
-        // create new comparer
-        Comparer comparer = new Comparer();
-        // create setting for comparing
-        ComparisonSettings settings = new ComparisonSettings();
-
         String firstPath = compareRequest.getFirstPath();
 
-        // compare two documents
-        ICompareResult compareResult = comparer.compare(firstPath,
-                convertEmptyPasswordToNull(compareRequest.getFirstPassword()),
-                compareRequest.getSecondPath(),
-                convertEmptyPasswordToNull(compareRequest.getSecondPassword()),
-                settings);
+        ICompareResult compareResult;
+
+        //TODO: remove this synchronization when the bug COMPARISONJAVA-436 is fixed
+        synchronized (this) {
+            // create new comparer
+            Comparer comparer = new Comparer();
+            // create setting for comparing
+            ComparisonSettings settings = new ComparisonSettings();
+
+
+            // compare two documents
+            compareResult = comparer.compare(firstPath,
+                    convertEmptyPasswordToNull(compareRequest.getFirstPassword()),
+                    compareRequest.getSecondPath(),
+                    convertEmptyPasswordToNull(compareRequest.getSecondPassword()),
+                    settings);
+        }
 
         if (compareResult == null) {
             throw new TotalGroupDocsException("Something went wrong. We've got null result.");
@@ -168,17 +174,23 @@ public class ComparisonServiceImpl implements ComparisonService {
      */
     @Override
     public CompareResultResponse compareFiles(InputStream firstContent, String firstPassword, InputStream secondContent, String secondPassword, String fileExt) {
-        // create new comparer
-        Comparer comparer = new Comparer();
-        // create setting for comparing
-        ComparisonSettings settings = new ComparisonSettings();
 
-        // compare two documents
-        ICompareResult compareResult = comparer.compare(firstContent,
-                convertEmptyPasswordToNull(firstPassword),
-                secondContent,
-                convertEmptyPasswordToNull(secondPassword),
-                settings);
+        ICompareResult compareResult;
+
+        //TODO: remove this synchronization when the bug COMPARISONJAVA-436 is fixed
+        synchronized (this) {
+            // create new comparer
+            Comparer comparer = new Comparer();
+            // create setting for comparing
+            ComparisonSettings settings = new ComparisonSettings();
+
+            // compare two documents
+            compareResult = comparer.compare(firstContent,
+                    convertEmptyPasswordToNull(firstPassword),
+                    secondContent,
+                    convertEmptyPasswordToNull(secondPassword),
+                    settings);
+        }
 
         if (compareResult == null) {
             throw new TotalGroupDocsException("Something went wrong. We've got null result.");
