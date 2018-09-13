@@ -64,7 +64,7 @@
 #gd-pages {
     display: flex;
     padding-top: 0px;
-    height: calc(100% - 176px);
+    height: calc(100% - 210px);
 }
 .gd-drag-n-drop-wrap-compare {
     margin-top: 0px;
