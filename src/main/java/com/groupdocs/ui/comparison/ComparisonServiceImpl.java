@@ -147,6 +147,10 @@ public class ComparisonServiceImpl implements ComparisonService {
                 convertEmptyPasswordToNull(compareRequest.getSecondPassword()),
                 settings);
 
+        if (compareResult == null) {
+            throw new TotalGroupDocsException("Something went wrong. We've got null result.");
+        }
+
         // convert results
         CompareResultResponse compareResultResponse = getCompareResultResponse(compareResult);
 
@@ -175,6 +179,10 @@ public class ComparisonServiceImpl implements ComparisonService {
                 secondContent,
                 convertEmptyPasswordToNull(secondPassword),
                 settings);
+
+        if (compareResult == null) {
+            throw new TotalGroupDocsException("Something went wrong. We've got null result.");
+        }
 
         // convert results
         CompareResultResponse compareResultResponse = getCompareResultResponse(compareResult);
