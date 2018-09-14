@@ -137,7 +137,7 @@ $(document).ready(function(){
         }else{
             toggleModalDialog(false, '');
             var guid = $(this).attr('data-guid');
-            fillFileVariables(fileNumber, {}, '', guid);
+            fillFileVariables(fileNumber, '', '', guid);
             addFileForComparing(null, guid, fileNumber);
         }
     });
@@ -202,7 +202,7 @@ $(document).ready(function(){
     //////////////////////////////////////////////////
     $('#gd-add-url-first').on('click', function () {
         var url = $("#gd-url-first").val();
-        fillFileVariables('first', {}, url, '');
+        fillFileVariables('first', '', url, '');
         addFileForComparing(null, url, 'first');
         $('#gd-url-first').val('');
     });
@@ -228,7 +228,7 @@ $(document).ready(function(){
     //////////////////////////////////////////////////
     $('#gd-add-url-second').on('click', function () {
         var url = $("#gd-url-second").val();
-        fillFileVariables('second', {}, url, '');
+        fillFileVariables('second', '', url, '');
         addFileForComparing(null, url, 'second');
         $('#gd-url-second').val('');
     });
@@ -291,8 +291,12 @@ $(document).ready(function(){
         var data;
         var firstPass = $('#gd-password-input-first').val();
         var secondPass = $('#gd-password-input-second').val();
-        if (compareFileGuidMap['first'] == undefined || compareFileGuidMap['first'] == '') {
-            if (compareFileUrlMap['first'] == undefined || compareFileUrlMap['first'] == '') {
+        if (mapIsEmpty(compareFileGuidMap)) {
+            if (mapIsEmpty(compareFileUrlMap)) {
+                if (mapIsEmpty(compareFileMap)) {
+                    printMessage("Select files for comparing first! The both of files should be selected in the same ways.");
+                    return;
+                }
                 data = new FormData();
                 data.append("firstFile", compareFileMap['first']);
                 data.append("secondFile", compareFileMap['second']);
@@ -631,6 +635,22 @@ FUNCTIONS
 ******************************************************************
 */
 
+/**
+ * Checks map with 'first' and 'second' files
+ */
+function mapIsEmpty(amap) {
+    if (amap) {
+        if (amap['first'] == null || amap['first'] == undefined || amap['first'] == ''
+            || amap['second'] == null || amap['second'] == undefined || amap['second'] == '') {
+
+            return true;
+        } else {
+            return false;
+        }
+    } else {
+        return true;
+    }
+}
 
 /**
  * Append html content to an empty page
@@ -1061,7 +1081,7 @@ function closeModal(){
  */
 function clearAndShowSelection(prefix) {
     // remove file from the files array
-    fillFileVariables(prefix, {}, '', '');
+    fillFileVariables(prefix, '', '', '');
     $('#gd-upload-input-' + prefix).val('');
     $('#gd-open-document-' + prefix).show();
     $("#gd-dropZone-" + prefix).show();
@@ -1147,25 +1167,14 @@ function addFileForComparing(uploadFiles, url, prefix) {
         });
     }
 
-    if ('first' == prefix) {
-        $('#gd-cancel-button-first').on('click', function() {
-            // get selected files
-            var button = $(this);
-            // remove table row
-            button.closest('div').parent().parent().parent().remove();
+    $('#gd-cancel-button-' + prefix).on('click', function() {
+        // get selected files
+        var button = $(this);
+        // remove table row
+        button.closest('div').parent().parent().parent().remove();
 
-            clearAndShowSelection('first');
-        });
-    } else {
-        $('#gd-cancel-button-second').on('click', function(){
-            // get selected files
-            var button = $(this);
-            // remove table row
-            button.closest('div').parent().parent().parent().remove();
-
-            clearAndShowSelection('second');
-        });
-    }
+        clearAndShowSelection(prefix);
+    });
 
     $("#gd-dropZone-" + prefix).hide();
 
@@ -1450,73 +1459,49 @@ GROUPDOCS.COMAPRISON PLUGIN
                 $(gd_navbar).append(getHtmlNavSplitter);
             }
 
-            var dropZoneFirst = $('#gd-dropZone-first');
-            if (typeof dropZoneFirst[0] != "undefined") {
-                //Drag n drop functional
-                if ($('#gd-dropZone-first').length) {
-                    if (typeof (window.FileReader) == 'undefined') {
-                        dropZoneFirst.text("Your browser doesn't support Drag and Drop");
-                        dropZoneFirst.addClass('error');
-                    }
-                }
+            initDropZone('first');
+            initDropZone('second');
 
-                dropZoneFirst[0].ondragover = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneFirst.addClass('hover');
-                    return false;
-                };
-
-                dropZoneFirst[0].ondragleave = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneFirst.removeClass('hover');
-                    return false;
-                };
-
-                dropZoneFirst[0].ondrop = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneFirst.removeClass('hover');
-                    var files = event.dataTransfer.files;
-                    addFileForComparing(files, null, 'first');
-                };
-            }
-            var dropZoneSecond = $('#gd-dropZone-second');
-            if (typeof dropZoneSecond[0] != "undefined") {
-                //Drag n drop functional
-                if ($('#gd-dropZone-second').length) {
-                    if (typeof (window.FileReader) == 'undefined') {
-                        dropZoneSecond.text("Your browser doesn't support Drag and Drop");
-                        dropZoneSecond.addClass('error');
-                    }
-                }
-
-                dropZoneSecond[0].ondragover = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneSecond.addClass('hover');
-                    return false;
-                };
-
-                dropZoneSecond[0].ondragleave = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneSecond.removeClass('hover');
-                    return false;
-                };
-
-                dropZoneSecond[0].ondrop = function (event) {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    dropZoneSecond.removeClass('hover');
-                    var files = event.dataTransfer.files;
-                    addFileForComparing(files, null, 'second');
-                };
+            if(options.multiComparing) {
+                //todo add +
             }
         }
     };
 
+    function initDropZone(prefix) {
+        var dropZone = $('#gd-dropZone-' + prefix);
+        if (typeof dropZone[0] != "undefined") {
+            //Drag n drop functional
+            if ($('#gd-dropZone-' + prefix).length) {
+                if (typeof (window.FileReader) == 'undefined') {
+                    dropZone.text("Your browser doesn't support Drag and Drop");
+                    dropZone.addClass('error');
+                }
+            }
+
+            dropZone[0].ondragover = function (event) {
+                event.stopPropagation();
+                event.preventDefault();
+                dropZone.addClass('hover');
+                return false;
+            };
+
+            dropZone[0].ondragleave = function (event) {
+                event.stopPropagation();
+                event.preventDefault();
+                dropZone.removeClass('hover');
+                return false;
+            };
+
+            dropZone[0].ondrop = function (event) {
+                event.stopPropagation();
+                event.preventDefault();
+                dropZone.removeClass('hover');
+                var files = event.dataTransfer.files;
+                addFileForComparing(files, null, prefix);
+            };
+        }
+    }
 
     /*
     ******************************************************************
