@@ -1,22 +1,22 @@
 #gd-header-logo {
     background-image: url('../images/logo.png') !important;
 }
-#gd-dropZone-first.hover, #gd-dropZone-second.hover {
+.gd-drag-n-drop-wrap-compare.hover {
     background: #ddd;
     border-color: #aaa;
 }
-#gd-url-cancel-first, #gd-url-cancel-second {
+.gd-url-cancel {
     background: transparent;
     position: absolute;
     left: 0;
     top: 0;
 }
-#gd-url-cancel-first i, #gd-url-cancel-second i {
+.gd-url-cancel-first i {
     font-size: 21px;
     margin-top: 5px;
     margin-left: 6px;
 }
-#gd-add-url-first, #gd-add-url-second {
+.gd-add-url {
     position: absolute;
     top: 0;
     color: #fff;
@@ -24,27 +24,26 @@
     padding: 7px 16px 6px;
     font-size: 12px;
 }
-#gd-upload-files-table-first, #gd-upload-files-table-second {
-    width: 100%;
+.gd-upload-files-table-idx {
+    left: 15px;
+    width: 260px;
     border-spacing: 0;
+    position: relative;
 }
-#gd-upload-files-table-first>tbody>tr:nth-of-type(odd) {
+.gd-upload-files-table-idx>tbody>tr:nth-of-type(odd) {
     background-color: #f9f9f9;
 }
 .gd-filetree-name-compare {
     position: absolute;
     top: 20px;
     left: 43px;
-    width: calc(100% - 260px);
+    width: 260px;
 }
 .gd-filetree-name-compare > span {
     font-size: 12px;
     font-weight: 300;
     color: #9a9a9a;
     margin-right: 15px;
-}
-#gd-upload-files-table-second>tbody>tr:nth-of-type(odd) {
-    background-color: #f9f9f9;
 }
 .gd-upload-files-table-i {
     font-size: 21px;
@@ -56,7 +55,7 @@
     display: unset;
 }
 #gd-select-compare-files {
-    display: table;
+    display: flex;
     width: 100%;
     height: initial;
     padding-top: 60px;
@@ -99,7 +98,6 @@
 #gd-select-compare-files section {
     float: left;
     padding: 20px 20px 20px;
-    width: 50%;
 }
 #gd-pages section {
     display: block;
@@ -165,4 +163,25 @@
     top: Calc(100% - 102px);
     display: none;
     color: #FF0000;
+}
+.gd-add-file-multicompare i {
+    color: #3e4e5a;
+    font-size: 108px;
+}
+.gd-files-blocks {
+    display: flex;
+    overflow-x: scroll;
+}
+.gd-close-dad-area {
+    position: inherit;
+    margin-top: -20px;
+}
+.gd-close-dad-area i {
+    color: #3e4e5a;
+}
+.gd-password-wrap > input {
+    width: unset;
+}
+.gd-url-wrap > input {
+    width: 230px;
 }

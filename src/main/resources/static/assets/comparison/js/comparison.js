@@ -29,6 +29,8 @@ var password = '';
 var map = {};
 var currentPageNumber = 0;
 var rewrite;
+var multiComparing;
+var idx = 0;
 // add supported formats
 map['folder'] = { 'format': '', 'icon': 'fa-folder' };
 map['pdf'] = { 'format': 'Portable Document Format', 'icon': 'fa-file-pdf' };
@@ -286,94 +288,108 @@ $(document).ready(function(){
     // Compare two files event
     //////////////////////////////////////////////////
     $('#gd-btn-compare').on('click', function () {
-        var context;
-        var contentType = 'application/json';
-        var data;
-        var firstPass = $('#gd-password-input-first').val();
-        var secondPass = $('#gd-password-input-second').val();
-        if (mapIsEmpty(compareFileGuidMap)) {
-            if (mapIsEmpty(compareFileUrlMap)) {
-                if (mapIsEmpty(compareFileMap)) {
-                    printMessage("Select files for comparing first! The both of files should be selected in the same ways.");
-                    return;
-                }
-                data = new FormData();
-                data.append("firstFile", compareFileMap['first']);
-                data.append("secondFile", compareFileMap['second']);
-                data.append("firstPassword", firstPass);
-                data.append("secondPassword", secondPass);
-                context = 'compareFiles';
-                contentType = false;
-            } else {
-                data = JSON.stringify({firstPath: compareFileUrlMap['first'], secondPath: compareFileUrlMap['second'], firstPassword: firstPass, secondPassword: secondPass});
-                context = 'compareWithUrls';
-            }
+        if (multiComparing) {
+            return;
         } else {
-            data = JSON.stringify({firstPath: compareFileGuidMap['first'], secondPath: compareFileGuidMap['second'], firstPassword: firstPass, secondPassword: secondPass});
-            context = 'compareWithPaths';
-        }
-        clearResultsContents();
-        // show loading spinner
-        $('#gd-compare-spinner').show();
-        // send compare
-        $.ajax({
-            type: 'POST',
-            url: getApplicationPath(context),
-            data: data,
-            contentType: contentType,
-            processData: false,
-            success: function(returnedData) {
-                if(returnedData.message != undefined){
-                    // open error popup
-                    printMessage(returnedData.message);
-                    return;
+            var context;
+            var contentType = 'application/json';
+            var data;
+            var firstPass = $('#gd-password-input-first').val();
+            var secondPass = $('#gd-password-input-second').val();
+            if (mapIsEmpty(compareFileGuidMap)) {
+                if (mapIsEmpty(compareFileUrlMap)) {
+                    if (mapIsEmpty(compareFileMap)) {
+                        printMessage("Select files for comparing first! The both of files should be selected in the same ways.");
+                        return;
+                    }
+                    data = new FormData();
+                    data.append("firstFile", compareFileMap['first']);
+                    data.append("secondFile", compareFileMap['second']);
+                    data.append("firstPassword", firstPass);
+                    data.append("secondPassword", secondPass);
+                    context = 'compareFiles';
+                    contentType = false;
+                } else {
+                    data = JSON.stringify({
+                        firstPath: compareFileUrlMap['first'],
+                        secondPath: compareFileUrlMap['second'],
+                        firstPassword: firstPass,
+                        secondPassword: secondPass
+                    });
+                    context = 'compareWithUrls';
                 }
-                // hide loading spinner
-                $('#gd-compare-spinner').hide();
-                documentResultGuid = returnedData.guid;
-                extension = returnedData.extension;
-                $.each(returnedData.pages, function(index, elem){
-                    changedPages = elem.page;
+            } else {
+                data = JSON.stringify({
+                    firstPath: compareFileGuidMap['first'],
+                    secondPath: compareFileGuidMap['second'],
+                    firstPassword: firstPass,
+                    secondPassword: secondPass
                 });
-                var totalPageNumber = returnedData.pages.length;
-                // append changes
-                $.each(returnedData.pages, function(index, elem){
-                    var pageNumber = index;
-
-                    // append empty page
-                    $('#gd-panzoom').append(
-                        '<div id="gd-page-' + pageNumber + '" class="gd-page" class="gd-page">'+
-                        '<div class="gd-page-spinner"><i class="fa fa-circle-o-notch fa-spin"></i> &nbsp;Loading... Please wait.</div>'+
-                        '</div>'
-                    );
-                    // save page data
-                    resultData.push({pageNumber: pageNumber, pageGuid: elem});
-                    setZoomValue(getZoomValue());
-                });
-                var counter = preloadResultPageCount;
-                // check pre-load page number is bigger than total pages number
-                if(preloadResultPageCount > totalPageNumber){
-                    counter = totalPageNumber;
-                }
-                // get page according to the pre-load page number
-                for(var i = 0; i < counter; i++){
-                    // render page
-                    appendHtmlContent(i, resultData[i].pageGuid);
-                }
-
-                // hide delete file icon
-                $('#gd-cancel-button-first').hide();
-                $('#gd-cancel-button-second').hide();
-            },
-            error: function(xhr, status, error) {
-                var err = eval("(" + xhr.responseText + ")");
-                console.log(err.message);
-                // hide loading spinner
-                $('#gd-compare-spinner').hide();
-                // open error popup
-                printMessage(err.message);
+                context = 'compareWithPaths';
             }
-        });
+            clearResultsContents();
+            // show loading spinner
+            $('#gd-compare-spinner').show();
+            // send compare
+            $.ajax({
+                type: 'POST',
+                url: getApplicationPath(context),
+                data: data,
+                contentType: contentType,
+                processData: false,
+                success: function (returnedData) {
+                    if (returnedData.message != undefined) {
+                        // open error popup
+                        printMessage(returnedData.message);
+                        return;
+                    }
+                    // hide loading spinner
+                    $('#gd-compare-spinner').hide();
+                    documentResultGuid = returnedData.guid;
+                    extension = returnedData.extension;
+                    $.each(returnedData.pages, function (index, elem) {
+                        changedPages = elem.page;
+                    });
+                    var totalPageNumber = returnedData.pages.length;
+                    // append changes
+                    $.each(returnedData.pages, function (index, elem) {
+                        var pageNumber = index;
+
+                        // append empty page
+                        $('#gd-panzoom').append(
+                            '<div id="gd-page-' + pageNumber + '" class="gd-page" class="gd-page">' +
+                            '<div class="gd-page-spinner"><i class="fa fa-circle-o-notch fa-spin"></i> &nbsp;Loading... Please wait.</div>' +
+                            '</div>'
+                        );
+                        // save page data
+                        resultData.push({pageNumber: pageNumber, pageGuid: elem});
+                        setZoomValue(getZoomValue());
+                    });
+                    var counter = preloadResultPageCount;
+                    // check pre-load page number is bigger than total pages number
+                    if (preloadResultPageCount > totalPageNumber) {
+                        counter = totalPageNumber;
+                    }
+                    // get page according to the pre-load page number
+                    for (var i = 0; i < counter; i++) {
+                        // render page
+                        appendHtmlContent(i, resultData[i].pageGuid);
+                    }
+
+                    // hide delete file icon
+                    $('#gd-cancel-button-first').hide();
+                    $('#gd-cancel-button-second').hide();
+                },
+                error: function (xhr, status, error) {
+                    var err = eval("(" + xhr.responseText + ")");
+                    console.log(err.message);
+                    // hide loading spinner
+                    $('#gd-compare-spinner').hide();
+                    // open error popup
+                    printMessage(err.message);
+                }
+            });
+        }
     });
     //////////////////////////////////////////////////
     // Clean current comparison results
@@ -624,6 +640,39 @@ $(document).ready(function(){
     $('.gd-modal-body').on('click', '#gd-open-document', function(e){
         toggleModalDialog(false, '');
         loadFileTree('');
+    });
+
+    $('#gd-add-file-multicompare').on('click', function(e){
+        var prefix = 'idx' + idx;
+        $('#gd-files-blocks').append(getHtmlDragAndDropArea(prefix));
+        initDropZone(prefix);
+        initCloseButton(prefix);
+        $('#gd-upload-input-' + prefix).on('change', function(e){
+            // get selected files
+            var input = $(this);
+            // add files to the table
+            addFileForComparing(input.get(0).files, null, prefix);
+        });
+        $('#gd-url-button-' + prefix).on('click', function () {
+            $('#gd-url-wrap-' + prefix).slideDown('fast');
+            $('#gd-url-' + prefix).focus();
+        });
+        $('#gd-url-cancel-' + prefix).on('click', function () {
+            $('#gd-url-wrap-' + prefix).slideUp('fast');
+            $('#gd-url-' + prefix).val('');
+        });
+        $('#gd-add-url-' + prefix).on('click', function () {
+            var url = $("#gd-url-" + prefix).val();
+            fillFileVariables(prefix, '', url, '');
+            addFileForComparing(null, url, prefix);
+            $('#gd-url-' + prefix).val('');
+        });
+        $('#gd-open-document-' + prefix).on('click', function(e){
+            toggleModalDialog(false, '');
+            fileNumber = prefix;
+            loadFileTree('');
+        });
+        idx = idx + 1;
     });
     //
 // END of document ready function
@@ -1336,11 +1385,18 @@ function getHtmlFileBrowser(){
  * Get HTML content for drag and drop area
  **/
 function getHtmlDragAndDropArea(prefix){
-    // grag and grop section
+    // close icon for multi comparing
+    var close = '';
+    if (prefix && prefix.startsWith('idx')) {
+        close = '<div class="gd-close-dad-area" id="gd-close-dad-area-' + prefix + '"> <i class="fas fa-window-close"></i></div>';
+    }
+
+    // drag and drop section
     var htmlSection = '<section id="gd-upload-section-' + prefix + '" class="tab-slider-body">'+
+        close +
         '<div class="gd-drag-n-drop-wrap-compare" id="gd-dropZone-' + prefix + '">'+
         '<div class="gd-drag-n-drop-icon"><i class="fas fa-cloud-download-alt fa-5x" aria-hidden="true"></i></div>'+
-        '<h2>Drag &amp; Drop the ' + prefix + ' file here</h2>'+
+        '<h2>Drag &amp; Drop the ' + replacePrefix(prefix) + ' file here</h2>'+
         '<h4>OR</h4>'+
         '<div class="gd-drag-n-drop-buttons">'+
         '<label class="btn btn-primary gd-upload-section-label">'+
@@ -1356,16 +1412,29 @@ function getHtmlDragAndDropArea(prefix){
         '</div>'+
         '<div class="inner-addon left-addon btn gd-url-wrap" id="gd-url-wrap-' + prefix + '" style="display: none;">'+
         '<input type="url" class="form-control" id="gd-url-' + prefix + '" placeholder="Enter your file URL">'+
-        '<button class="btn" id="gd-url-cancel-' + prefix + '"><i class="fas fa-trash"></i></button>'+
-        '<button class="btn btn-primary" id="gd-add-url-' + prefix + '">Add</button>'+
+        '<button class="btn gd-url-cancel" id="gd-url-cancel-' + prefix + '"><i class="fas fa-trash"></i></button>'+
+        '<button class="btn btn-primary gd-add-url" id="gd-add-url-' + prefix + '">Add</button>'+
         '</div>'+
-        '<div id="gd-upload-files-table-' + prefix + '">'+
+        '<div id="gd-upload-files-table-' + prefix + '" class="gd-upload-files-table-idx">'+
         // list of files
         '</div>'+
         '<div class="gd-browse-document gd-modal-buttons" id="gd-open-document-' + prefix + '">'+
         '<i class="fas fa-folder-open"></i>BROWSE files'+
         '</section>';
     return htmlSection;
+}
+
+/**
+ * Replace prefix for file more than second
+ *
+ * @param prefix
+ * @returns 'first', 'second' for 1, 2. After 2 returns 'next'
+ */
+function replacePrefix(prefix) {
+    if (prefix == 'first' || prefix == 'second') {
+        return prefix;
+    }
+    return 'next';
 }
 
 /**
@@ -1392,6 +1461,56 @@ function toggleNavDropdown(target){
                 { opacity: 0 },
                 { queue: false, duration: 'fast' }
             );
+    }
+}
+
+/**
+ * Init remove button for selection area
+ * @param prefix - prefix for selection area
+ */
+function initCloseButton(prefix) {
+    $('#gd-close-dad-area-' + prefix).on('click', function(e) {
+        fillFileVariables(prefix, '', '', '');
+        $('#gd-upload-section-' + prefix).remove();
+    });
+}
+
+/**
+ * Init drop zone for file selection area
+ * @param prefix - prefix for selection area
+ */
+function initDropZone(prefix) {
+    var dropZone = $('#gd-dropZone-' + prefix);
+    if (typeof dropZone[0] != "undefined") {
+        //Drag n drop functional
+        if ($('#gd-dropZone-' + prefix).length) {
+            if (typeof (window.FileReader) == 'undefined') {
+                dropZone.text("Your browser doesn't support Drag and Drop");
+                dropZone.addClass('error');
+            }
+        }
+
+        dropZone[0].ondragover = function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            dropZone.addClass('hover');
+            return false;
+        };
+
+        dropZone[0].ondragleave = function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            dropZone.removeClass('hover');
+            return false;
+        };
+
+        dropZone[0].ondrop = function (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            dropZone.removeClass('hover');
+            var files = event.dataTransfer.files;
+            addFileForComparing(files, null, prefix);
+        };
     }
 }
 
@@ -1425,7 +1544,8 @@ GROUPDOCS.COMAPRISON PLUGIN
                 download: true,
                 upload: true,
                 print: true,
-                rewrite: true
+                rewrite: true,
+                multiComparing: false
             };
             options = $.extend(defaults, options);
 
@@ -1433,6 +1553,7 @@ GROUPDOCS.COMAPRISON PLUGIN
             applicationPath = options.applicationPath;
             preloadResultPageCount = options.preloadResultPageCount;
             rewrite = options.rewrite;
+            multiComparing = options.multiComparing;
 
             // assembly html base
             this.append(getHtmlBase);
@@ -1462,46 +1583,8 @@ GROUPDOCS.COMAPRISON PLUGIN
             initDropZone('first');
             initDropZone('second');
 
-            if(options.multiComparing) {
-                //todo add +
-            }
         }
     };
-
-    function initDropZone(prefix) {
-        var dropZone = $('#gd-dropZone-' + prefix);
-        if (typeof dropZone[0] != "undefined") {
-            //Drag n drop functional
-            if ($('#gd-dropZone-' + prefix).length) {
-                if (typeof (window.FileReader) == 'undefined') {
-                    dropZone.text("Your browser doesn't support Drag and Drop");
-                    dropZone.addClass('error');
-                }
-            }
-
-            dropZone[0].ondragover = function (event) {
-                event.stopPropagation();
-                event.preventDefault();
-                dropZone.addClass('hover');
-                return false;
-            };
-
-            dropZone[0].ondragleave = function (event) {
-                event.stopPropagation();
-                event.preventDefault();
-                dropZone.removeClass('hover');
-                return false;
-            };
-
-            dropZone[0].ondrop = function (event) {
-                event.stopPropagation();
-                event.preventDefault();
-                dropZone.removeClass('hover');
-                var files = event.dataTransfer.files;
-                addFileForComparing(files, null, prefix);
-            };
-        }
-    }
 
     /*
     ******************************************************************
@@ -1517,7 +1600,6 @@ GROUPDOCS.COMAPRISON PLUGIN
             $.error( 'Method' +  method + ' does not exist on jQuery.comparison' );
         }
     };
-
 
     /*
     ******************************************************************
@@ -1555,7 +1637,10 @@ GROUPDOCS.COMAPRISON PLUGIN
             '</div>'+
             // header END
             '<div id="gd-select-compare-files">'+
+                '<div id="gd-files-blocks" class="gd-files-blocks">'+
                 getHtmlDragAndDropArea('first') + getHtmlDragAndDropArea('second') +
+                '</div>'+
+                getHtmlMultiCompare() +
             '</div>'+
             // pages BEGIN
             '<div id="gd-pages">'+
@@ -1569,6 +1654,18 @@ GROUPDOCS.COMAPRISON PLUGIN
 
             '</div>'+
             '</div>';
+    }
+
+    function getHtmlMultiCompare() {
+        if (multiComparing) {
+            return '<section id="gd-add-multicompare" >'+
+                '<div id="gd-add-file-multicompare" class="gd-add-file-multicompare">' +
+                '<i class="fas fa-plus-circle"></i>' +
+                '</div>' +
+                '</section>';
+        } else {
+            return '';
+        }
     }
 
     function getHtmlModalDialog(){

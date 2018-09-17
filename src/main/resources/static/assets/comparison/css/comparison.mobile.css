@@ -1,5 +1,5 @@
 @media (max-width: 1024px) {
-    #gd-dropZone-first, #gd-dropZone-second  {
+    gd-drag-n-drop-wrap-compare  {
         width: 100%;
         background: transparent;
         border: 0;
@@ -22,28 +22,26 @@
         height: 90px;
     }
 
-    #gd-upload-files-table-first, #gd-upload-files-table-second {
+    .gd-upload-files-table-idx {
         width: calc(100% - 20px);
     }
 
     .swiper-slide-comparison {
-        width: 80%;
+        width: 80% !important;
     }
 
     #gd-select-compare-files section {
         width: 100%;
+        padding-top: 50px;
     }
 
     #gd-pages section {
         padding: 20px 20px 20px;
         width: 100%;
-    }
-
-    #gd-upload-section-first div, #gd-upload-section-second div {
         font-size: 38px;
     }
 
-    #gd-upload-files-table-first > div, #gd-upload-files-table-second > div {
+    .gd-upload-files-table-idx > div {
         height: 275px !important;
     }
 
@@ -84,7 +82,7 @@
 
     .gd-password-wrap {
         position: relative;
-        margin-top: 150px !important;
+        margin-top: 160px !important;
     }
 
     #gd-navbar > li {
@@ -103,5 +101,29 @@
 
     .gd-modal-title {
         font-size: 42px;
+    }
+
+    .gd-close-dad-area {
+        margin-top: -50px;
+    }
+
+    .gd-close-dad-area i {
+        font-size: 54px;
+    }
+    .gd-file-name {
+        font-size: 30px;
+    }
+    .gd-cancel-button {
+        color: #3e4e5a;
+    }
+    .files-table-remove i {
+        color: #3e4e5a;
+    }
+    .swiper-slide-cancel {
+        background-color: unset;
+        width: unset !important;
+    }
+    .files-table-remove {
+        height: 110px;
     }
 }
