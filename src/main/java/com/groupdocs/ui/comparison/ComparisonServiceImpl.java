@@ -2,10 +2,12 @@ package com.groupdocs.ui.comparison;
 
 import com.google.common.collect.Ordering;
 import com.groupdocs.comparison.Comparer;
+import com.groupdocs.comparison.MultiComparer;
 import com.groupdocs.comparison.common.changes.ChangeInfo;
 import com.groupdocs.comparison.common.compareresult.ICompareResult;
 import com.groupdocs.comparison.common.comparisonsettings.ComparisonSettings;
 import com.groupdocs.comparison.common.license.License;
+import com.groupdocs.comparison.internal.c.a.m.System.e.q;
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
 import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
@@ -252,6 +254,67 @@ public class ComparisonServiceImpl implements ComparisonService {
         String extension = FilenameUtils.getExtension(firstFile);
         // check if files extensions are the same and support format file
         return extension.equals(FilenameUtils.getExtension(secondFile)) && checkSupportedFiles(extension);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public CompareResultResponse multiCompareFiles(List<InputStream> files, List<String> passwords, String ext) {
+
+        ICompareResult compareResult;
+
+        //TODO: remove this synchronization when the bug COMPARISONJAVA-436 is fixed
+        synchronized (this) {
+            // create new comparer
+            MultiComparer multiComparer = new MultiComparer();
+            // create setting for comparing
+            ComparisonSettings settings = new ComparisonSettings();
+
+            // transform lists of files and passwords
+            List<q> newFiles = new ArrayList<>();
+            List<String> newPasswords = new ArrayList<>();
+            for (int i = 1; i < files.size(); i++) {
+                newFiles.add(com.groupdocs.comparison.internal.c.a.m.System.e.q.E(files.get(i)));
+                newPasswords.add(passwords.get(i));
+            }
+
+            // compare two documents
+            compareResult = multiComparer.compare(files.get(0), passwords.get(0), newFiles, newPasswords,
+                    settings);
+        }
+
+        if (compareResult == null) {
+            throw new TotalGroupDocsException("Something went wrong. We've got null result.");
+        }
+
+        // convert results
+        CompareResultResponse compareResultResponse = getCompareResultResponse(compareResult);
+
+        //save all results in file
+        saveFile(compareResultResponse.getGuid(), null, compareResult.getStream(), ext);
+
+        compareResultResponse.setExtension(ext);
+
+        return compareResultResponse;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean checkMultiFiles(List<String> fileNames) {
+        String extension = FilenameUtils.getExtension(fileNames.get(0));
+        // check if files extensions are the same and support format file
+        if (! checkSupportedFiles(extension)) {
+            return false;
+        }
+        for (String path : fileNames) {
+            if (! extension.equals(FilenameUtils.getExtension(path))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

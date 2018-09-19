@@ -75,4 +75,22 @@ public interface ComparisonService {
      * @return true - formats of the both files are the same and format is supported, false - other
      */
     boolean checkFiles(String firstFileName, String secondFileName);
+
+    /**
+     * Compare several files
+     *
+     * @param files list of input streams for files
+     * @param passwords list of passwords for files
+     * @param ext result file extension
+     * @return comparing results
+     */
+    CompareResultResponse multiCompareFiles(List<InputStream> files, List<String> passwords, String ext);
+
+    /**
+     * Check format files for comparing
+     *
+     * @param fileNames the list of paths to files
+     * @return true - formats of all the files are the same and format is supported, false - other
+     */
+    boolean checkMultiFiles(List<String> fileNames);
 }

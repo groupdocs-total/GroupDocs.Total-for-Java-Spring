@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.groupdocs</groupId>
             <artifactId>groupdocs-comparison</artifactId>
-            <version>18.6</version>
+            <version>18.6.2</version>
             <type>jar</type>
         </dependency>
         <dependency>

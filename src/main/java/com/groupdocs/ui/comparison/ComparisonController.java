@@ -1,5 +1,7 @@
 package com.groupdocs.ui.comparison;
 
+import com.google.common.collect.Lists;
+import com.groupdocs.ui.comparison.model.request.CompareFileDataRequest;
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
 import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
@@ -27,6 +29,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -245,5 +248,140 @@ public class ComparisonController {
     @ResponseBody
     public LoadedPageEntity loadResultPage(@RequestBody LoadResultPageRequest loadResultPageRequest){
         return comparisonService.loadResultPage(loadResultPageRequest);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/compare",
+            consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public CompareResultResponse compare(@RequestPart("files") MultipartFile[] files,
+                                         @RequestPart("passwords") List<String> passwords,
+                                         @RequestPart("urls") List<CompareFileDataRequest> urls,
+                                         @RequestPart("paths") List<CompareFileDataRequest> paths) {
+        // calculate total amount of files
+        int initialCapacity = files.length + urls.size() + paths.size();
+
+        if (initialCapacity != 2) {
+            throw new TotalGroupDocsException("Comparing is impossible. There are must be 2 files.");
+        }
+        try {
+            // transform all files into input streams
+            TransformFiles transformFiles = new TransformFiles(Lists.newArrayList(files), passwords, urls, paths, initialCapacity).transformToStreams();
+            List<String> fileNames = transformFiles.getFileNames();
+
+            // check formats
+            if (comparisonService.checkMultiFiles(fileNames)) {
+                // get file extension
+                String ext = FilenameUtils.getExtension(fileNames.get(0));
+
+                // compare
+                List<InputStream> newFiles = transformFiles.getNewFiles();
+                List<String> newPasswords = transformFiles.getNewPasswords();
+                return comparisonService.compareFiles(newFiles.get(0), newPasswords.get(0), newFiles.get(1), newPasswords.get(1), ext);
+            } else {
+                logger.error("Document types are different");
+                throw new TotalGroupDocsException("Document types are different");
+            }
+        } catch (IOException e) {
+            logger.error("Exception occurred while compare files.");
+            throw new TotalGroupDocsException("Exception occurred while compare files.", e);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/multiCompare",
+            consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public CompareResultResponse multiCompare(@RequestPart("files") MultipartFile[] files,
+                                              @RequestPart("passwords") List<String> passwords,
+                                              @RequestPart("urls") List<CompareFileDataRequest> urls,
+                                              @RequestPart("paths") List<CompareFileDataRequest> paths) {
+        // calculate total amount of files
+        int initialCapacity = files.length + urls.size() + paths.size();
+
+        if (initialCapacity < 2) {
+            throw new TotalGroupDocsException("Comparing is impossible. There are less than 2 files.");
+        }
+        try {
+            // transform all files into input streams
+            TransformFiles transformFiles = new TransformFiles(Lists.newArrayList(files), passwords, urls, paths, initialCapacity).transformToStreams();
+            List<String> fileNames = transformFiles.getFileNames();
+
+            // check formats
+            if (comparisonService.checkMultiFiles(fileNames)) {
+                // get file extension
+                String ext = FilenameUtils.getExtension(fileNames.get(0));
+
+                // compare
+                return comparisonService.multiCompareFiles(transformFiles.getNewFiles(), transformFiles.getNewPasswords(), ext);
+            } else {
+                logger.error("Document types are different");
+                throw new TotalGroupDocsException("Document types are different");
+            }
+        } catch (IOException e) {
+            logger.error("Exception occurred while multi compare files by streams.");
+            throw new TotalGroupDocsException("Exception occurred while multi compare files by streams.", e);
+        }
+    }
+
+    private class TransformFiles {
+        private List<MultipartFile> files;
+        private List<String> passwords;
+        private List<CompareFileDataRequest> urls;
+        private List<CompareFileDataRequest> paths;
+        private int initialCapacity;
+        private List<InputStream> newFiles;
+        private List<String> fileNames;
+        private List<String> newPasswords;
+
+        public TransformFiles(List<MultipartFile> files, List<String> passwords, List<CompareFileDataRequest> urls, List<CompareFileDataRequest> paths, int initialCapacity) {
+            this.files = files;
+            this.passwords = passwords;
+            this.urls = urls;
+            this.paths = paths;
+            this.initialCapacity = initialCapacity;
+        }
+
+        public List<InputStream> getNewFiles() {
+            return newFiles;
+        }
+
+        public List<String> getFileNames() {
+            return fileNames;
+        }
+
+        public List<String> getNewPasswords() {
+            return newPasswords;
+        }
+
+        public TransformFiles transformToStreams() throws IOException {
+            newFiles = new ArrayList<>(initialCapacity);
+            fileNames = new ArrayList<>(initialCapacity);
+            newPasswords = new ArrayList<>(initialCapacity);
+
+            // transform MultipartFile
+            for (int i = 0; i < files.size(); i++) {
+                MultipartFile file = files.get(i);
+                fileNames.add(file.getOriginalFilename());
+                newFiles.add(file.getInputStream());
+                newPasswords.add(passwords.get(i));
+            }
+
+            // transform urls
+            for (CompareFileDataRequest urlRequest: urls) {
+                String file = urlRequest.getFile();
+                fileNames.add(file);
+                URL url = URI.create(file).toURL();
+                newFiles.add(url.openStream());
+                newPasswords.add(urlRequest.getPassword());
+            }
+
+            // transform paths
+            for (CompareFileDataRequest pathRequest: paths) {
+                String file = pathRequest.getFile();
+                fileNames.add(file);
+                newFiles.add(new FileInputStream(file));
+                newPasswords.add(pathRequest.getPassword());
+            }
+            return this;
+        }
     }
 }

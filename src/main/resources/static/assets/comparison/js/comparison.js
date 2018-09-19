@@ -288,28 +288,60 @@ $(document).ready(function(){
     // Compare two files event
     //////////////////////////////////////////////////
     $('#gd-btn-compare').on('click', function () {
-        if (multiComparing) {
-            return;
+        var context;
+        var contentType = 'application/json';
+        var data;
+        // collect all selected files in arrays
+        var filesData = collectFiles();
+        // calculate amount of selected files
+        var amountOfFiles1 = amountOfFiles(filesData);
+        // if multi-compare supports and amount of files more than 2
+        if (multiComparing && amountOfFiles1 > 2) {
+            data = new FormData();
+            $.each(filesData['files'], function (index, elem) {
+                data.append("files", elem);
+            });
+            data.append("passwords", new Blob([JSON.stringify(filesData['passwords'])], { type: "application/json"}));
+            data.append("urls", new Blob([JSON.stringify(filesData['urls'])], { type: "application/json"}));
+            data.append("paths", new Blob([JSON.stringify(filesData['paths'])], { type: "application/json"}));
+
+            context = 'multiCompare';
+            contentType = false;
         } else {
-            var context;
-            var contentType = 'application/json';
-            var data;
-            var firstPass = $('#gd-password-input-first').val();
-            var secondPass = $('#gd-password-input-second').val();
+            var firstPass = getPassword('first');
+            var secondPass = getPassword('second');
+            // paths of files less than 2
             if (mapIsEmpty(compareFileGuidMap)) {
+                // urls less than 2
                 if (mapIsEmpty(compareFileUrlMap)) {
+                    // files less than 2
                     if (mapIsEmpty(compareFileMap)) {
-                        printMessage("Select files for comparing first! The both of files should be selected in the same ways.");
-                        return;
+                        // files are 2, but got by different ways
+                        if (amountOfFiles1 == 2) {
+                            data = new FormData();
+                            $.each(filesData['files'], function (index, elem) {
+                                data.append("files", elem);
+                            });
+                            data.append("passwords", new Blob([JSON.stringify(filesData['passwords'])], { type: "application/json"}));
+                            data.append("urls", new Blob([JSON.stringify(filesData['urls'])], { type: "application/json"}));
+                            data.append("paths", new Blob([JSON.stringify(filesData['paths'])], { type: "application/json"}));
+
+                            context = 'compare';
+                            contentType = false;
+                        } else { // files are less than 2
+                            printMessage("Select files for comparing first!");
+                            return;
+                        }
+                    } else { // files are 2 for comparing
+                        data = new FormData();
+                        data.append("firstFile", compareFileMap['first']);
+                        data.append("secondFile", compareFileMap['second']);
+                        data.append("firstPassword", firstPass);
+                        data.append("secondPassword", secondPass);
+                        context = 'compareFiles';
+                        contentType = false;
                     }
-                    data = new FormData();
-                    data.append("firstFile", compareFileMap['first']);
-                    data.append("secondFile", compareFileMap['second']);
-                    data.append("firstPassword", firstPass);
-                    data.append("secondPassword", secondPass);
-                    context = 'compareFiles';
-                    contentType = false;
-                } else {
+                } else { // urls are 2, compare with urls
                     data = JSON.stringify({
                         firstPath: compareFileUrlMap['first'],
                         secondPath: compareFileUrlMap['second'],
@@ -318,7 +350,7 @@ $(document).ready(function(){
                     });
                     context = 'compareWithUrls';
                 }
-            } else {
+            } else {// paths are 2, compare with paths
                 data = JSON.stringify({
                     firstPath: compareFileGuidMap['first'],
                     secondPath: compareFileGuidMap['second'],
@@ -327,69 +359,70 @@ $(document).ready(function(){
                 });
                 context = 'compareWithPaths';
             }
-            clearResultsContents();
-            // show loading spinner
-            $('#gd-compare-spinner').show();
-            // send compare
-            $.ajax({
-                type: 'POST',
-                url: getApplicationPath(context),
-                data: data,
-                contentType: contentType,
-                processData: false,
-                success: function (returnedData) {
-                    if (returnedData.message != undefined) {
-                        // open error popup
-                        printMessage(returnedData.message);
-                        return;
-                    }
-                    // hide loading spinner
-                    $('#gd-compare-spinner').hide();
-                    documentResultGuid = returnedData.guid;
-                    extension = returnedData.extension;
-                    $.each(returnedData.pages, function (index, elem) {
-                        changedPages = elem.page;
-                    });
-                    var totalPageNumber = returnedData.pages.length;
-                    // append changes
-                    $.each(returnedData.pages, function (index, elem) {
-                        var pageNumber = index;
-
-                        // append empty page
-                        $('#gd-panzoom').append(
-                            '<div id="gd-page-' + pageNumber + '" class="gd-page" class="gd-page">' +
-                            '<div class="gd-page-spinner"><i class="fa fa-circle-o-notch fa-spin"></i> &nbsp;Loading... Please wait.</div>' +
-                            '</div>'
-                        );
-                        // save page data
-                        resultData.push({pageNumber: pageNumber, pageGuid: elem});
-                        setZoomValue(getZoomValue());
-                    });
-                    var counter = preloadResultPageCount;
-                    // check pre-load page number is bigger than total pages number
-                    if (preloadResultPageCount > totalPageNumber) {
-                        counter = totalPageNumber;
-                    }
-                    // get page according to the pre-load page number
-                    for (var i = 0; i < counter; i++) {
-                        // render page
-                        appendHtmlContent(i, resultData[i].pageGuid);
-                    }
-
-                    // hide delete file icon
-                    $('#gd-cancel-button-first').hide();
-                    $('#gd-cancel-button-second').hide();
-                },
-                error: function (xhr, status, error) {
-                    var err = eval("(" + xhr.responseText + ")");
-                    console.log(err.message);
-                    // hide loading spinner
-                    $('#gd-compare-spinner').hide();
-                    // open error popup
-                    printMessage(err.message);
-                }
-            });
         }
+        // clear previous results
+        clearResultsContents();
+        // show loading spinner
+        $('#gd-compare-spinner').show();
+        // send compare
+        $.ajax({
+            type: 'POST',
+            url: getApplicationPath(context),
+            data: data,
+            contentType: contentType,
+            processData: false,
+            success: function (returnedData) {
+                if (returnedData.message != undefined) {
+                    // open error popup
+                    printMessage(returnedData.message);
+                    return;
+                }
+                // hide loading spinner
+                $('#gd-compare-spinner').hide();
+                documentResultGuid = returnedData.guid;
+                extension = returnedData.extension;
+                $.each(returnedData.pages, function (index, elem) {
+                    changedPages = elem.page;
+                });
+                var totalPageNumber = returnedData.pages.length;
+                // append changes
+                $.each(returnedData.pages, function (index, elem) {
+                    var pageNumber = index;
+
+                    // append empty page
+                    $('#gd-panzoom').append(
+                        '<div id="gd-page-' + pageNumber + '" class="gd-page" class="gd-page">' +
+                        '<div class="gd-page-spinner"><i class="fa fa-circle-o-notch fa-spin"></i> &nbsp;Loading... Please wait.</div>' +
+                        '</div>'
+                    );
+                    // save page data
+                    resultData.push({pageNumber: pageNumber, pageGuid: elem});
+                    setZoomValue(getZoomValue());
+                });
+                var counter = preloadResultPageCount;
+                // check pre-load page number is bigger than total pages number
+                if (preloadResultPageCount > totalPageNumber) {
+                    counter = totalPageNumber;
+                }
+                // get page according to the pre-load page number
+                for (var i = 0; i < counter; i++) {
+                    // render page
+                    appendHtmlContent(i, resultData[i].pageGuid);
+                }
+
+                // hide delete file icon
+                $('#gd-cancel-button-first').hide();
+                $('#gd-cancel-button-second').hide();
+            },
+            error: function (xhr, status, error) {
+                var err = eval("(" + xhr.responseText + ")");
+                console.log(err.message);
+                // hide loading spinner
+                $('#gd-compare-spinner').hide();
+                // open error popup
+                printMessage(err.message);
+            }
+        });
     });
     //////////////////////////////////////////////////
     // Clean current comparison results
@@ -399,6 +432,11 @@ $(document).ready(function(){
         clearFilesRows('second');
         clearAndShowSelection('first');
         clearAndShowSelection('second');
+        for (var i = 0; i < idx; i++) {
+            var prefix = 'idx' + i;
+            clearFilesRows(prefix);
+            clearAndShowSelection(prefix);
+        }
         clearResultsContents();
     });
 
@@ -743,6 +781,92 @@ function appendHtmlContent(pageNumber, path) {
     }
 }
 
+/**
+ * Get the value of password for file
+ * @param prefix for specifying the file
+ * @returns password
+ */
+function getPassword(prefix) {
+    return $('#gd-password-input-' + prefix).val();
+}
+
+/**
+ * Fill files for comparing
+ * @param fileMap
+ * @param prefix
+ * @param res
+ * @param passwords
+ */
+function transformInternal(fileMap, prefix, res, passwords) {
+    if (fileMap[prefix]) {
+        res.push(fileMap[prefix]);
+        passwords.push(getPassword(prefix));
+    }
+}
+
+/**
+ * Transform files for comparing
+ * @param fileMap
+ * @param res
+ * @param passwords
+ */
+function transform(fileMap, res, passwords) {
+    if (passwords) {
+        transformInternal(fileMap, 'first', res, passwords);
+        transformInternal(fileMap, 'second', res, passwords);
+    } else {
+        transformToObj(fileMap, 'first', res);
+        transformToObj(fileMap, 'second', res);
+    }
+}
+
+/**
+ * Transform to object into list
+ * @param fileMap
+ * @param prefix
+ * @param res
+ */
+function transformToObj(fileMap, prefix, res) {
+    if (fileMap[prefix]) {
+        res.push({file: fileMap[prefix], password: getPassword(prefix)});
+    }
+}
+
+/**
+ * Collect and prepare files for compare
+ *
+ * @returns object with files, passwords, urls, paths prepared for compare
+ */
+function collectFiles() {
+    var files = [];
+    var passwords = [];
+    var urls = [];
+    var paths = [];
+    transform(compareFileMap, files, passwords);
+    transform(compareFileGuidMap, paths, null);
+    transform(compareFileUrlMap, urls, null);
+    for (var i = 0; i < idx; i++) {
+        var prefix = 'idx' + i;
+        // fill files and passwords
+        transformInternal(compareFileMap, prefix, files, passwords);
+        // fill paths by objects with path to file and password
+        transformToObj(compareFileGuidMap, prefix, paths);
+        // fill urls by objects with url to file and password
+        transformToObj(compareFileUrlMap, prefix, urls);
+    }
+
+    return {"files": files, "passwords": passwords, "urls": urls, "paths": paths};
+}
+
+/**
+ * Returns amount of selected files
+ * @param filesData
+ * @returns
+ */
+function amountOfFiles(filesData) {
+    return filesData['files'].length + filesData['urls'].length + filesData['paths'].length;
+}
+
 
 /**
  * Zoom document
@@ -786,6 +910,10 @@ function clearResultsContents() {
     // clear passwords
     $('#gd-password-input-first').val('');
     $('#gd-password-input-second').val('');
+    for (var i = 0; i < idx; i++) {
+        var prefix = 'idx' + i;
+        $('#gd-password-input-' + prefix).val('');
+    }
     // hide spinner
     $('#gd-compare-spinner').hide();
     // remove previously rendered results pages
