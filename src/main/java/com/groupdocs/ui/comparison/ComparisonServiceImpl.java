@@ -238,7 +238,7 @@ public class ComparisonServiceImpl implements ComparisonService {
     public String calculateResultFileName(String documentGuid, Integer index, String ext) {
         // configure file name for results
         String resultDirectory = StringUtils.isEmpty(comparisonConfiguration.getResultDirectory()) ? comparisonConfiguration.getFilesDirectory() : comparisonConfiguration.getResultDirectory();
-        String extension = ext != null ? getRightExt(ext) : "";
+        String extension = ext != null ? getRightExt(ext.toLowerCase()) : "";
         // for images of pages specify index, for all result pages file specify "all" prefix
         String idx = index == null ? "all." : index.toString() + ".";
         String suffix = idx + extension;
@@ -252,7 +252,7 @@ public class ComparisonServiceImpl implements ComparisonService {
     public boolean checkFiles(String firstFile, String secondFile) {
         String extension = FilenameUtils.getExtension(firstFile);
         // check if files extensions are the same and support format file
-        return extension.equals(FilenameUtils.getExtension(secondFile)) && checkSupportedFiles(extension);
+        return extension.equals(FilenameUtils.getExtension(secondFile)) && checkSupportedFiles(extension.toLowerCase());
     }
 
     /**
