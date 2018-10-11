@@ -156,7 +156,7 @@ public class Utils {
             for (int i = 0; i < listOfFiles.length; i++) {
                 int number = i + 1;
                 String newFileName = FilenameUtils.removeExtension(fileName) + "-Copy(" + number + ")." + FilenameUtils.getExtension(fileName);
-                file = new File(directory + "/" + newFileName);
+                file = new File(directory + File.separator + newFileName);
                 if (file.exists()) {
                     continue;
                 } else {
