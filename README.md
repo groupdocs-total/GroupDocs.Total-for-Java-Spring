@@ -1,5 +1,5 @@
 # GroupDocs.Total-for-Java-Spring Example
-###### version 0.4.3
+###### version 0.4.4
 
 
 ## System Requirements
