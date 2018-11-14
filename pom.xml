@@ -184,26 +184,6 @@
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>1.4.0.RELEASE</version>
-                <configuration>
-                    <arguments>
-                        <argument>configuration.yml</argument>
-                    </arguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                        <configuration>
-                            <skip>true</skip>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 </project>

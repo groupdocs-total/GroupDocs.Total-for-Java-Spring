@@ -23,7 +23,7 @@ public class Application {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     private static final String DEFAULT_CONFIGURATION_FILE = "defaultConfiguration.yml";
-    private static String configurationFile = "";
+    private static String configurationFile = "configuration.yml";
 
     public static void main(String[] args) {
         if (args != null && args.length > 0) {
