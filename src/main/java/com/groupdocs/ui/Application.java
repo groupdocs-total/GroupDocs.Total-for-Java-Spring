@@ -35,6 +35,13 @@ public class Application {
     @Bean
     public static PropertySourcesPlaceholderConfigurer properties() {
         PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+        YamlPropertiesFactoryBean propertiesFactoryBean = getYamlPropertiesFactoryBean();
+
+        propertySourcesPlaceholderConfigurer.setProperties(propertiesFactoryBean.getObject());
+        return propertySourcesPlaceholderConfigurer;
+    }
+
+    public static YamlPropertiesFactoryBean getYamlPropertiesFactoryBean() {
         YamlPropertiesFactoryBean propertiesFactoryBean = new YamlPropertiesFactoryBean();
         ClassPathResource defaultResource = new ClassPathResource(DEFAULT_CONFIGURATION_FILE);
 
@@ -51,9 +58,7 @@ public class Application {
             logger.info("Can not find external configuration file. Use default.");
             propertiesFactoryBean.setResources(defaultResource);
         }
-
-        propertySourcesPlaceholderConfigurer.setProperties(propertiesFactoryBean.getObject());
-        return propertySourcesPlaceholderConfigurer;
+        return propertiesFactoryBean;
     }
 
     /**
