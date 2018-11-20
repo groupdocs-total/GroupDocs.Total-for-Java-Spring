@@ -13,3 +13,5 @@ src/main/resources/static/assets/*
 node/
 etc/
 package-lock.json
+Licenses/*
+DocumentSamples/*
