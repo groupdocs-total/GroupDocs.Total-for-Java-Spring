@@ -7,7 +7,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 
-import static com.groupdocs.ui.config.DefaultDirectories.DEFAULT_FILES;
+import static com.groupdocs.ui.config.DefaultDirectories.defaultAnnotationDirectory;
 import static com.groupdocs.ui.config.DefaultDirectories.relativePathToAbsolute;
 
 /**
@@ -80,7 +80,7 @@ public class AnnotationConfiguration extends CommonConfiguration {
 
     @PostConstruct
     public void init() {
-        this.filesDirectory = StringUtils.isEmpty(this.filesDirectory) ? DEFAULT_FILES : relativePathToAbsolute(this.filesDirectory);
+        this.filesDirectory = StringUtils.isEmpty(this.filesDirectory) ? defaultAnnotationDirectory() : relativePathToAbsolute(this.filesDirectory);
     }
 
     public String getFilesDirectory() {

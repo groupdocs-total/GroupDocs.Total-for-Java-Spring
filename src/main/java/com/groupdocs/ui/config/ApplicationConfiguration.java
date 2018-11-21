@@ -6,7 +6,7 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 
-import static com.groupdocs.ui.config.DefaultDirectories.DEFAULT_LIC;
+import static com.groupdocs.ui.config.DefaultDirectories.defaultLicenseDirectory;
 import static com.groupdocs.ui.config.DefaultDirectories.relativePathToAbsolute;
 
 @Component
@@ -17,7 +17,7 @@ public class ApplicationConfiguration {
 
     @PostConstruct
     public void init() {
-        this.licensePath = StringUtils.isEmpty(this.licensePath) ? DEFAULT_LIC : relativePathToAbsolute(this.licensePath);
+        this.licensePath = StringUtils.isEmpty(this.licensePath) ? defaultLicenseDirectory() : relativePathToAbsolute(this.licensePath);
     }
 
     public String getLicensePath() {
