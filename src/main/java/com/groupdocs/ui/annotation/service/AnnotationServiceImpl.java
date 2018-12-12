@@ -20,6 +20,7 @@ import com.groupdocs.ui.annotation.entity.web.AnnotatedDocumentEntity;
 import com.groupdocs.ui.annotation.entity.web.AnnotationDataEntity;
 import com.groupdocs.ui.annotation.importer.Importer;
 import com.groupdocs.ui.annotation.util.AnnotationMapper;
+import com.groupdocs.ui.annotation.util.SupportedAnnotations;
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
@@ -49,7 +50,7 @@ public class AnnotationServiceImpl implements AnnotationService {
     private static final Logger logger = LoggerFactory.getLogger(AnnotationServiceImpl.class);
 
     private static final List<String> supportedImageFormats = Lists.newArrayList("bmp", "jpeg", "jpg", "tiff", "tif", "png", "gif", "emf", "wmf", "dwg", "dicom", "djvu");
-    private static final List<String> supportedAutoCadFormats = Lists.newArrayList("dxf", "dwg");
+    private static final List<String> supportedDiagramFormats = Lists.newArrayList(".vsd", ".vdx", ".vss", ".vsx", ".vst", ".vtx", ".vsdx", ".vdw", ".vstx", ".vssx");
 
     @Autowired
     private GlobalConfiguration globalConfiguration;
@@ -158,7 +159,7 @@ public class AnnotationServiceImpl implements AnnotationService {
             // check if document type is image
             if (supportedImageFormats.contains(fileExtension)) {
                 documentType = "image";
-            } else if (supportedAutoCadFormats.contains(fileExtension)) {
+            } else if (supportedDiagramFormats.contains(fileExtension)) {
                 documentType = "diagram";
             }
             // check if document contains annotations
@@ -172,10 +173,12 @@ public class AnnotationServiceImpl implements AnnotationService {
             if(annotationConfiguration.getPreloadPageCount() == 0){
                 pageImages = getAnnotationImageHandler().getPages(fileName, imageOptions);
             }
+            String[] supportedAnnotations = SupportedAnnotations.getSupportedAnnotations(documentType);
             for (int i = 0; i < pages.size(); i++) {
                 // initiate custom Document description object
                 AnnotatedDocumentEntity description = new AnnotatedDocumentEntity();
                 description.setGuid(documentGuid);
+                description.setSupportedAnnotations(supportedAnnotations);
                 // set current page info for result
                 PageData pageData = pages.get(i);
                 description.setHeight(pageData.getHeight());

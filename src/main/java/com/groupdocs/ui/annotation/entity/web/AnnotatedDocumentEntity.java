@@ -16,8 +16,14 @@ public class AnnotatedDocumentEntity extends DocumentDescriptionEntity {
      * List of annotation data
      */
     private AnnotationDataEntity[] annotations;
-
+    /**
+     * Annotation data
+     */
     private String data;
+    /**
+     * List of supported types of annotations
+     */
+    public String[] supportedAnnotations;
 
 
     public String getGuid() {
@@ -39,4 +45,12 @@ public class AnnotatedDocumentEntity extends DocumentDescriptionEntity {
     public String getData(){return data;}
 
     public void setData(String image){ this.data = image;}
+
+    public String[] getSupportedAnnotations() {
+        return supportedAnnotations;
+    }
+
+    public void setSupportedAnnotations(String[] supportedAnnotations) {
+        this.supportedAnnotations = supportedAnnotations;
+    }
 }
