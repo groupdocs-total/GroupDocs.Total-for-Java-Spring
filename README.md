@@ -1,5 +1,5 @@
 # GroupDocs.Total-for-Java-Spring Example
-###### version 0.4.13
+###### version 0.4.14
 
 [![Build Status](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring.svg?branch=master)](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a67135407f3b0dab72a/maintainability)](https://codeclimate.com/github/groupdocs-total/GroupDocs.Total-for-Java-Spring/maintainability)
