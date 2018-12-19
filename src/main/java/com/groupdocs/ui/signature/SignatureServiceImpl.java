@@ -50,7 +50,6 @@ import java.util.Base64;
 import java.util.List;
 
 import static com.groupdocs.ui.signature.PathConstants.DATA_FOLDER;
-import static com.groupdocs.ui.signature.PathConstants.OUTPUT_FOLDER;
 import static com.groupdocs.ui.signature.model.SignatureDirectory.*;
 import static com.groupdocs.ui.util.Utils.getFreeFileName;
 import static com.groupdocs.ui.util.Utils.uploadFile;
@@ -99,7 +98,6 @@ public class SignatureServiceImpl implements SignatureService {
         config.setStoragePath(signatureConfiguration.getFilesDirectory());
         config.setCertificatesPath(getFullDataPath(CERTIFICATE_DATA_DIRECTORY.getPath()));
         config.setImagesPath(getFullDataPath(IMAGE_DATA_DIRECTORY.getPath()));
-        config.setOutputPath(getFullDataPath(OUTPUT_FOLDER));
 
         // initialize total instance for the Image mode
         signatureHandler = new SignatureHandler(config);
@@ -253,14 +251,12 @@ public class SignatureServiceImpl implements SignatureService {
             if (signaturesData == null || signaturesData.isEmpty()) {
                 throw new IllegalArgumentException("Sign data is empty");
             }
-            // get signed document name
-            String signedFileName = new File(documentGuid).getName();
             // initiate signed document response
             SignedDocumentEntity signedDocument = new SignedDocumentEntity();
 
             final SaveOptions saveOptions = new SaveOptions();
             saveOptions.setOutputType(OutputType.String);
-            saveOptions.setOutputFileName(signedFileName);
+            saveOptions.setOutputFileName(FilenameUtils.getName(documentGuid));
 
             LoadOptions loadOptions = new LoadOptions();
             if (!StringUtils.isEmpty(password)) {
@@ -357,7 +353,7 @@ public class SignatureServiceImpl implements SignatureService {
                 if (signatureDataEntity.getDeleted()) {
                     continue;
                 } else {
-                    String xmlFileName = FilenameUtils.removeExtension(new File(signatureDataEntity.getSignatureGuid()).getName());
+                    String xmlFileName = FilenameUtils.removeExtension(FilenameUtils.getName(signatureDataEntity.getSignatureGuid()));
                     // Load xml data
                     String fileName = String.format("%s%s%s.xml", xmlPath, File.separator, xmlFileName);
                     StampXmlEntityList stampData;
@@ -405,7 +401,7 @@ public class SignatureServiceImpl implements SignatureService {
                 SignatureDataEntity signatureDataEntity = signaturesData.get(i);
                 if (!signatureDataEntity.getDeleted()) {
                     // get xml data of the QR-Code
-                    String xmlFileName = FilenameUtils.removeExtension(new File(signatureDataEntity.getSignatureGuid()).getName());
+                    String xmlFileName = FilenameUtils.removeExtension(FilenameUtils.getName(signatureDataEntity.getSignatureGuid()));
                     // Load xml data
                     String fileName = String.format("%s%s%s.xml", xmlPath, File.separator, xmlFileName);
                     OpticalXmlEntity opticalCodeData = new XMLReaderWriter<OpticalXmlEntity>().read(fileName, OpticalXmlEntity.class);
@@ -449,7 +445,7 @@ public class SignatureServiceImpl implements SignatureService {
                 SignatureDataEntity signatureDataEntity = signaturesData.get(i);
                 if (!signatureDataEntity.getDeleted()) {
                     // get xml data of the Text signature
-                    String xmlFileName = FilenameUtils.removeExtension(new File(signatureDataEntity.getSignatureGuid()).getName());
+                    String xmlFileName = FilenameUtils.removeExtension(FilenameUtils.getName(signatureDataEntity.getSignatureGuid()));
                     // Load xml data
                     String fileName = String.format("%s%s%s.xml", xmlPath, File.separator, xmlFileName);
                     TextXmlEntity textData = new XMLReaderWriter<TextXmlEntity>().read(fileName, TextXmlEntity.class);
@@ -568,8 +564,6 @@ public class SignatureServiceImpl implements SignatureService {
             signatureHandler.getSignatureConfig().setOutputPath(previewPath);
             // sign generated image with Optical signature
             signatureHandler.sign(file.toPath().toString(), collection, saveOptions);
-            // set signed documents path back to correct path
-            signatureHandler.getSignatureConfig().setOutputPath(getFullDataPath(OUTPUT_FOLDER));
             // set data for response
             opticalCodeData.setImageGuid(file.toPath().toString());
             opticalCodeData.setHeight(200);
@@ -638,8 +632,6 @@ public class SignatureServiceImpl implements SignatureService {
             signatureHandler.getSignatureConfig().setOutputPath(previewPath);
             // sign generated image with Text
             signatureHandler.sign(file.toPath().toString(), collection, saveOptions);
-            // set signed documents path back to correct path
-            signatureHandler.getSignatureConfig().setOutputPath(getFullDataPath(OUTPUT_FOLDER));
             // set Text data for response
             textData.setImageGuid(file.toPath().toString());
             // get Text preview as Base64 String
@@ -792,7 +784,8 @@ public class SignatureServiceImpl implements SignatureService {
         // set save options
         final SaveOptions saveOptions = new SaveOptions();
         saveOptions.setOutputType(OutputType.String);
-        saveOptions.setOutputFileName(new File(documentGuid).getName());
+        saveOptions.setOutputFileName(FilenameUtils.getName(documentGuid));
+        saveOptions.setOverwriteExistingFiles(true);
 
         // set password
         LoadOptions loadOptions = new LoadOptions();
@@ -800,9 +793,13 @@ public class SignatureServiceImpl implements SignatureService {
             loadOptions.setPassword(password);
         }
 
+        String outputPath = FilenameUtils.getFullPath(documentGuid);
+        signatureHandler.getSignatureConfig().setOutputPath(outputPath);
+
         // sign document
         SignedDocumentEntity signedDocument = new SignedDocumentEntity();
         signedDocument.setGuid(signatureHandler.sign(documentGuid, signsCollection, loadOptions, saveOptions).toString());
+
         return signedDocument;
     }
 }
