@@ -147,10 +147,10 @@ Download [latest release](https://github.com/groupdocs-total/GroupDocs.Total-for
 **Note**: This method is **recommended** for running this sample behind firewall.
 
 ```bash
-curl -J -L -o release.tar.gz https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/releases/download/1.14.0/release.tar.gz
+curl -J -L -o release.tar.gz https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/releases/download/0.4.15/release.tar.gz
 tar -xvzf release.tar.gz
 cd release
-java -jar total-spring-1.14.0.jar configuration.yaml
+java -jar total-spring-0.4.15.jar configuration.yaml
 ## Open http://localhost:8080/ in your favorite browser.
 ```
 
