@@ -83,11 +83,11 @@ public class AnnotationServiceImpl implements AnnotationService {
     }
 
     private void initOutputDirectory() {
-        if(StringUtils.isEmpty(annotationConfiguration.getOutputDirectory())) {
+        if (StringUtils.isEmpty(annotationConfiguration.getOutputDirectory())) {
             String outputDirectory = String.format("%s%s", annotationConfiguration.getFilesDirectory(), OUTPUT_FOLDER);
             annotationConfiguration.setOutputDirectory(outputDirectory);
         }
-        if(!new File(annotationConfiguration.getOutputDirectory()).exists()) {
+        if (!new File(annotationConfiguration.getOutputDirectory()).exists()) {
             new File(annotationConfiguration.getOutputDirectory()).mkdirs();
         }
     }
@@ -169,7 +169,7 @@ public class AnnotationServiceImpl implements AnnotationService {
             List<PageImage> pageImages = null;
             List<PageData> pages = documentDescription.getPages();
             // TODO: remove once perf. issue is fixed
-            if(annotationConfiguration.getPreloadPageCount() == 0){
+            if (annotationConfiguration.getPreloadPageCount() == 0) {
                 pageImages = getAnnotationImageHandler().getPages(fileName, imageOptions);
             }
             String[] supportedAnnotations = SupportedAnnotations.getSupportedAnnotations(documentType);
@@ -191,7 +191,7 @@ public class AnnotationServiceImpl implements AnnotationService {
                     page.setAnnotations(AnnotationMapper.instance.mapForPage(annotations, page.getNumber()));
                 }
                 // TODO: remove once perf. issue is fixed
-                if(pageImages != null) {
+                if (pageImages != null) {
                     byte[] bytes = IOUtils.toByteArray(pageImages.get(i).getStream());
                     String encodedImage = Base64.getEncoder().encodeToString(bytes);
                     page.setData(encodedImage);
@@ -281,7 +281,8 @@ public class AnnotationServiceImpl implements AnnotationService {
                     throw new TotalGroupDocsException(ex.getMessage(), ex);
                 }
             }
-            String fileName = new File(documentGuid).getName();
+            String forPrint = annotateDocumentRequest.getPrint() ? "Temp" : "";
+            String fileName = FilenameUtils.getBaseName(documentGuid) + forPrint + "." + FilenameUtils.getExtension(documentGuid);
             String path = annotationConfiguration.getOutputDirectory() + File.separator + fileName;
             // check if annotations array contains at least one annotation to add
             if (annotations.size() > 0) {
@@ -291,14 +292,47 @@ public class AnnotationServiceImpl implements AnnotationService {
                 file = getAnnotationImageHandler().exportAnnotationsToDocument(file, annotations, type);
             }
             (new File(path)).delete();
-            try (OutputStream fileStream = new FileOutputStream(path)) {
-                IOUtils.copyLarge(file, fileStream);
-                annotatedDocument.setGuid(path);
+            if (annotateDocumentRequest.getPrint()) {
+                List<PageDataDescriptionEntity> annotatedPages = getAnnotatedPages(password, file);
+                annotatedDocument.setPages(annotatedPages);
+                (new File(path)).delete();
+            } else {
+                try (OutputStream fileStream = new FileOutputStream(path)) {
+                    IOUtils.copyLarge(file, fileStream);
+                    annotatedDocument.setGuid(path);
+                }
             }
         } catch (Exception ex) {
             throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
         return annotatedDocument;
+    }
+
+    /**
+     * Get pages images of annotated file
+     *
+     * @param password    password for the file
+     * @param inputStream stream of annotated file
+     * @return
+     * @throws IOException
+     */
+    private List<PageDataDescriptionEntity> getAnnotatedPages(String password, InputStream inputStream) throws IOException {
+        ImageOptions imageOptions = new ImageOptions();
+        // set password for protected document
+        if (!password.isEmpty()) {
+            imageOptions.setPassword(password);
+        }
+        List<PageImage> pages = getAnnotationImageHandler().getPages(inputStream, imageOptions);
+        List<PageDataDescriptionEntity> pagesDescriptions = new ArrayList<>(pages.size());
+        for (PageImage pageImage : pages) {
+            byte[] bytes = IOUtils.toByteArray(pageImage.getStream());
+            String encodedImage = Base64.getEncoder().encodeToString(bytes);
+            PageDataDescriptionEntity page = new PageDataDescriptionEntity();
+            page.setData(encodedImage);
+
+            pagesDescriptions.add(page);
+        }
+        return pagesDescriptions;
     }
 
     public String parseFileExtension(String documentGuid) {
