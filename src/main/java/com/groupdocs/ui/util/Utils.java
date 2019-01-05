@@ -31,6 +31,17 @@ public class Utils {
     public static final FileTypeComparator FILE_TYPE_COMPARATOR = new FileTypeComparator();
 
     /**
+     * Parse extension of the file's name
+     *
+     * @param documentGuid path to file
+     * @return extension of the file's name
+     */
+    public static String parseFileExtension(String documentGuid) {
+        String extension = FilenameUtils.getExtension(documentGuid);
+        return extension == null ? null : extension.toLowerCase();
+    }
+
+    /**
      * Fill header HTTP response with file data
      */
     public static void addFileDownloadHeaders(HttpServletResponse response, String fileName, Long fileLength) {
