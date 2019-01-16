@@ -33,6 +33,8 @@ public class TextFieldAnnotator extends AbstractTextAnnotator {
         // Text field annotation
         AnnotationInfo textFieldAnnotation = initAnnotationInfo();
         textFieldAnnotation.setAnnotationPosition(new Point(annotationData.getLeft(), annotationData.getTop()));
+        textFieldAnnotation.setFontColor(255);
+        textFieldAnnotation.setBackgroundColor(16777215);
         return textFieldAnnotation;
     }
 
