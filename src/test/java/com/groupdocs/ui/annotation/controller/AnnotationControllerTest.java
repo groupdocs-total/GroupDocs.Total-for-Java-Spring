@@ -23,8 +23,10 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @SpringBootTest
 public class AnnotationControllerTest {
     MockMvc mvc;
+
     @Autowired
     protected WebApplicationContext wac;
+
     @Autowired
     AnnotationController controller;
 
