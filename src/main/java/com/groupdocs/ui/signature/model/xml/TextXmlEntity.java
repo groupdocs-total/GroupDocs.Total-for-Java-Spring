@@ -11,14 +11,27 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name="TextXmlEntity", namespace="TextXmlEntity")
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TextXmlEntity extends XmlEntityWithImage {
-    private String backgroundColor = "rgb(255,255,255)";
+public class TextXmlEntity extends XmlEntity {
+    private String encodedImage;
+
+    private String backgroundColor = "rgb(0,0,0)";
     private String fontColor = "rgb(0,0,0)";
+    private String borderColor = "rgb(0,0,0)";
     private String font;
+    private int borderStyle;
     private int fontSize;
-    private boolean bold;
-    private boolean italic;
-    private boolean underline;
+    private int borderWidth;
+    private Boolean bold;
+    private Boolean italic;
+    private Boolean underline;
+
+    public String getEncodedImage() {
+        return encodedImage;
+    }
+
+    public void setEncodedImage(String encodedImage) {
+        this.encodedImage = encodedImage;
+    }
 
     public String getBackgroundColor() {
         return backgroundColor;
@@ -36,12 +49,28 @@ public class TextXmlEntity extends XmlEntityWithImage {
         this.fontColor = fontColor;
     }
 
+    public String getBorderColor() {
+        return borderColor;
+    }
+
+    public void setBorderColor(String borderColor) {
+        this.borderColor = borderColor;
+    }
+
     public String getFont() {
         return font;
     }
 
     public void setFont(String font) {
         this.font = font;
+    }
+
+    public int getBorderStyle() {
+        return borderStyle;
+    }
+
+    public void setBorderStyle(int borderStyle) {
+        this.borderStyle = borderStyle;
     }
 
     public int getFontSize() {
@@ -52,27 +81,35 @@ public class TextXmlEntity extends XmlEntityWithImage {
         this.fontSize = fontSize;
     }
 
-    public boolean getBold() {
+    public int getBorderWidth() {
+        return borderWidth;
+    }
+
+    public void setBorderWidth(int borderWidth) {
+        this.borderWidth = borderWidth;
+    }
+
+    public Boolean getBold() {
         return bold;
     }
 
-    public void setBold(boolean bold) {
+    public void setBold(Boolean bold) {
         this.bold = bold;
     }
 
-    public boolean getItalic() {
+    public Boolean getItalic() {
         return italic;
     }
 
-    public void setItalic(boolean italic) {
+    public void setItalic(Boolean italic) {
         this.italic = italic;
     }
 
-    public boolean getUnderline() {
+    public Boolean getUnderline() {
         return underline;
     }
 
-    public void setUnderline(boolean underline) {
+    public void setUnderline(Boolean underline) {
         this.underline = underline;
     }
 }

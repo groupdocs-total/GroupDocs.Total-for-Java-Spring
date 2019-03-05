@@ -16,6 +16,9 @@ public class SignatureConfiguration extends CommonConfiguration {
     @Value("${signature.filesDirectory}")
     private String filesDirectory;
 
+    @Value("${signature.outputDirectory}")
+    private String outputDirectory;
+
     @Value("${signature.dataDirectory}")
     private String dataDirectory;
 
@@ -60,6 +63,14 @@ public class SignatureConfiguration extends CommonConfiguration {
 
     public void setFilesDirectory(String filesDirectory) {
         this.filesDirectory = filesDirectory;
+    }
+
+    public String getOutputDirectory() {
+        return outputDirectory;
+    }
+
+    public void setOutputDirectory(String outputDirectory) {
+        this.outputDirectory = outputDirectory;
     }
 
     public String getDataDirectory() {
@@ -155,6 +166,7 @@ public class SignatureConfiguration extends CommonConfiguration {
         return super.toString() +
                 "SignatureConfiguration{" +
                 "filesDirectory='" + filesDirectory + '\'' +
+                ", outputDirectory='" + outputDirectory + '\'' +
                 ", dataDirectory='" + dataDirectory + '\'' +
                 ", textSignature=" + textSignature +
                 ", imageSignature=" + imageSignature +
