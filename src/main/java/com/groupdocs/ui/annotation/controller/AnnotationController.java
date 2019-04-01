@@ -182,7 +182,6 @@ public class AnnotationController {
             logger.error("Exception in downloading document", ex);
             throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
-
         Utils.addFileDownloadLengthHeader(response, length);
     }
 
