@@ -18,9 +18,7 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $('#element').viewer({
-        /*[+
-        applicationPath: 'http://' + [[${globalConfiguration.application.hostAddress}]] + ':' + [[${globalConfiguration.server.httpPort}]] + [[${globalConfiguration.server.applicationContextPath}]] + '/viewer',
-        +]*/
+        applicationPath: window.location.href,
         defaultDocument: /*[[${viewerConfiguration.defaultDocument}]]*/'',
         htmlMode: /*[[${viewerConfiguration.htmlMode}]]*/'',
         preloadPageCount: /*[[${viewerConfiguration.preloadPageCount}]]*/'',
