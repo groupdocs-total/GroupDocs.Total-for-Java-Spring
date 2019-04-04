@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class DefaultDirectories {
@@ -56,9 +58,13 @@ public class DefaultDirectories {
         return path.toString();
     }
 
-    private static void makeDirs(File file) {
+    public static void makeDirs(File file) {
         if (!file.exists()) {
-            file.mkdirs();
+            try {
+                Files.createDirectories(file.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

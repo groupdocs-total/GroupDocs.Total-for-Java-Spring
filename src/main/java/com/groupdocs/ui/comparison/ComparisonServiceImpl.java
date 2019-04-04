@@ -10,6 +10,7 @@ import com.groupdocs.comparison.common.license.License;
 import com.groupdocs.ui.comparison.model.request.CompareRequest;
 import com.groupdocs.ui.comparison.model.request.LoadResultPageRequest;
 import com.groupdocs.ui.comparison.model.response.CompareResultResponse;
+import com.groupdocs.ui.config.DefaultDirectories;
 import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
@@ -65,7 +66,7 @@ public class ComparisonServiceImpl implements ComparisonService {
             resultDirectory = filesDirectory + File.separator + "Temp";
             comparisonConfiguration.setResultDirectory(resultDirectory);
         }
-        new File(resultDirectory).mkdirs();
+        DefaultDirectories.makeDirs(new File(resultDirectory));
         // set GroupDocs license
         try {
             License license = new License();
