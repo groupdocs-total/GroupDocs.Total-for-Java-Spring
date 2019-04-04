@@ -63,7 +63,7 @@ public class DefaultDirectories {
             try {
                 Files.createDirectories(file.toPath());
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         }
     }
