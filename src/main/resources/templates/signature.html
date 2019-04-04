@@ -45,9 +45,7 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $('#element').signature({
-        /*[+
-        applicationPath: 'http://' + [[${globalConfiguration.application.hostAddress}]] + ':' + [[${globalConfiguration.server.httpPort}]] + [[${globalConfiguration.server.applicationContextPath}]] + '/signature',
-        +]*/
+        applicationPath: window.location.href,
         defaultDocument: /*[[${signatureConfiguration.defaultDocument}]]*/'',
         preloadPageCount: /*[[${signatureConfiguration.preloadPageCount}]]*/'',
         pageSelector: /*[[${signatureConfiguration.pageSelector}]]*/'',

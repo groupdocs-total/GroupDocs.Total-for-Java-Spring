@@ -31,9 +31,7 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $('#element').annotation({
-        /*[+
-        applicationPath: 'http://' + [[${globalConfiguration.application.hostAddress}]] + ':' + [[${globalConfiguration.server.httpPort}]] + [[${globalConfiguration.server.applicationContextPath}]] + '/annotation',
-        +]*/
+        applicationPath: window.location.href,
         defaultDocument: /*[[${annotationConfiguration.defaultDocument}]]*/'',
         preloadPageCount: /*[[${annotationConfiguration.preloadPageCount}]]*/'',
         pageSelector: /*[[${annotationConfiguration.pageSelector}]]*/'',

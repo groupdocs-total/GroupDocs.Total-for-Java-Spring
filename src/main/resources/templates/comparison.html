@@ -21,9 +21,7 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
     $('#element').comparison({
-        /*[+
-        applicationPath: 'http://' + [[${globalConfiguration.application.hostAddress}]] + ':' + [[${globalConfiguration.server.httpPort}]] + [[${globalConfiguration.server.applicationContextPath}]] + '/comparison',
-        +]*/
+        applicationPath: window.location.href,
         download: /*[[${comparisonConfiguration.download}]]*/'',
         upload: /*[[${comparisonConfiguration.upload}]]*/'',
         print: /*[[${comparisonConfiguration.print}]]*/'',
