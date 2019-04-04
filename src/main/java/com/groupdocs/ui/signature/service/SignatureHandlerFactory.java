@@ -2,6 +2,7 @@ package com.groupdocs.ui.signature.service;
 
 import com.groupdocs.signature.config.SignatureConfig;
 import com.groupdocs.signature.handler.SignatureHandler;
+import com.groupdocs.ui.config.DefaultDirectories;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
@@ -59,19 +60,19 @@ public class SignatureHandlerFactory {
     }
 
     public static void createDirectories(String dataDirectory) {
-        new File(getFullDataPath(dataDirectory, CERTIFICATE_DATA_DIRECTORY.getPath())).mkdirs();
-        new File(getFullDataPath(dataDirectory, IMAGE_DATA_DIRECTORY.getPath())).mkdirs();
-        new File(getFullDataPath(dataDirectory, IMAGE_UPLOADED_DATA_DIRECTORY.getPath())).mkdirs();
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, CERTIFICATE_DATA_DIRECTORY.getPath())));
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, IMAGE_DATA_DIRECTORY.getPath())));
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, IMAGE_UPLOADED_DATA_DIRECTORY.getPath())));
 
-        new File(getFullDataPath(dataDirectory, STAMP_DATA_DIRECTORY.getXMLPath())).mkdirs();
-        new File(getFullDataPath(dataDirectory, STAMP_DATA_DIRECTORY.getPreviewPath())).mkdirs();
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, STAMP_DATA_DIRECTORY.getXMLPath())));
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, STAMP_DATA_DIRECTORY.getPreviewPath())));
 
-        new File(getFullDataPath(dataDirectory, QRCODE_DATA_DIRECTORY.getXMLPath())).mkdirs();
-        new File(getFullDataPath(dataDirectory, QRCODE_DATA_DIRECTORY.getPreviewPath())).mkdirs();
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, QRCODE_DATA_DIRECTORY.getXMLPath())));
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, QRCODE_DATA_DIRECTORY.getPreviewPath())));
 
-        new File(getFullDataPath(dataDirectory, BARCODE_DATA_DIRECTORY.getXMLPath())).mkdirs();
-        new File(getFullDataPath(dataDirectory, BARCODE_DATA_DIRECTORY.getPreviewPath())).mkdirs();
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, BARCODE_DATA_DIRECTORY.getXMLPath())));
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, BARCODE_DATA_DIRECTORY.getPreviewPath())));
 
-        new File(getFullDataPath(dataDirectory, TEXT_DATA_DIRECTORY.getXMLPath())).mkdirs();
+        DefaultDirectories.makeDirs(new File(getFullDataPath(dataDirectory, TEXT_DATA_DIRECTORY.getXMLPath())));
     }
 }
