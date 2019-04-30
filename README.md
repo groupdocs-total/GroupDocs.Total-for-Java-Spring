@@ -1,26 +1,57 @@
-# GroupDocs.Total-for-Java-Spring Example
+# GroupDocs.Total for Java Spring Example
 ###### version 0.4.47
 
 [![Build Status](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring.svg?branch=master)](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a67135407f3b0dab72a/maintainability)](https://codeclimate.com/github/groupdocs-total/GroupDocs.Total-for-Java-Spring/maintainability)
+[![GitHub license](https://img.shields.io/github/license/groupdocs-total/GroupDocs.Total-for-Java-Spring.svg)](https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/blob/master/LICENSE)
 
 ## System Requirements
 - Java 8 (JDK 1.8)
 - Maven 3
 
 
-## Description
-GroupDocs.Total UI suite is a native, simple, fully configurable and optimized application which allows you to manipulate documents within your desktop solutions and web apps without requiring any other commercial application through GroupDocs APIs.
+## All-in-one document manipulation API
 
-**Note** Without a license application will run in trial mode, purchase [GroupDocs.Total for Java license](https://purchase.groupdocs.com/order-online-step-1-of-8.aspx) or request [GroupDocs.Total for Java temporary license](https://purchase.groupdocs.com/temporary-license).
+**GroupDocs.Total for Java API** is a suite of powerful, flexible and high-performance libraries which allows you to manipulate documents within your desktop solutions and web apps without requiring any other commercial application through GroupDocs APIs. GroupDocs.Total allows you to perform all kinds of operations(view, edit, annotate, sign, compare, convert, etc) with **PDF, DOCX, PPT, XLS**, and over 90 other document formats.
 
+This web application demonstrates the following document manipulation capabilities:
+
+- View documents with a document viewer
+- Annotate & write on documents 
+- Digitally sign documents
+- Compare documents 
+
+
+**Note:** without a license application will run in trial mode, purchase [GroupDocs.Total for Java license](https://purchase.groupdocs.com/order-online-step-1-of-8.aspx) or request [GroupDocs.Total for Java temporary license](https://purchase.groupdocs.com/temporary-license).
+
+## Supported document Formats
+
+| Family                      | Formats                                                                                                                            |
+| --------------------------- |:---------------------------------------------------------------------------------------------------------------------------------- |
+| Portable Document Format    | `PDF`                                                                                                                              |
+| Microsoft Word              | `DOC`, `DOCM` , `DOCX`, `DOT`, `DOTM`, `DOTX`                                                                                      |
+| Microsoft Excel             | `XLS`, `XLSB`, `XLSM`, `XLSX`, `XLT`, `XLTM`, `XLTX`                                                                               |
+| Microsoft PowerPoint        | `PPT`, `POT`, `POTM`, `POTX`, `PPS`, `PPSM`, `PPSX`, `PPTM`, `PPTX`                                                                |
+| Microsoft Visio             | `VSD`, `VDW`, `VDX`, `VSDX`, `VSS`, `VST`, `VSX`, `VTX`                                                                            |
+| Microsoft Project           | `MPP`, `MPT`                                                                                                                       |
+| Microsoft Outlook           | `EML`, `EMLX`, `MSG`                                                                                                               |
+| OpenDocument Formats        | `ODT`, `ODP`, `ODS`, `OTT`                                                                                                         |
+| Plain Text File             | `TXT`                                                                                                                              |
+| Comma-Separated Values      | `CSV`                                                                                                                              |
+| HyperText Markup Language   | `HTML`, `MHT`, `MHTML`, `SVG`                                                                                                      |
+| Extensible Markup Language  | `XML`,`XML`, `XPS`                                                                                                                 |
+| AutoCAD Drawing File Format | `DGN`, `DWG`, `DXF`                                                                                                                |
+| Image files                 | `BMP`, `CAL`, `DCX`, `DIB`, `EMF`, `GIF`, `JP2`, `JPG`, `MIL`, `MIL`, `PCD`, `PCT`, `PCX`, `PNG`, `PSD`, `RAS`, `TGA`,`TIFF`,`WMF` |
+| Electronic publication      | `EPUB`                                                                                                                             |
+| Windows Icon                | `ICO`                                                                                                                              |
+| Medical image files         | `DCM`                                                                                                                              | 
 
 ## Demo Video
 Coming soon
 
 
 ## Features
-#### GroupDocs.Viewer
+#### [View documents](https://github.com/groupdocs-viewer/GroupDocs.Viewer-for-Java-Spring) with GroupDocs.Viewer
 - Clean, modern and intuitive design
 - Easily switchable colour theme (create your own colour theme in 5 minutes)
 - Responsive design
@@ -43,7 +74,8 @@ Coming soon
 - Display two or more pages side by side (when zooming out)
 - Cross-browser support (Safari, Chrome, Opera, Firefox)
 - Cross-platform support (Windows, Linux, MacOS)
-#### GroupDocs.Signature
+
+#### [Digitally sign documents](https://github.com/groupdocs-signature/GroupDocs.Signature-for-Java-Spring) with GroupDocs.Signature
 - Clean, modern and intuitive design
 - Easily switchable colour theme (create your own colour theme in 5 minutes)
 - Responsive design
@@ -68,7 +100,7 @@ Coming soon
 - Multi-language support for displaying errors
 - Cross-browser support (Safari, Chrome, Opera, Firefox)
 - Cross-platform support (Windows, Linux, MacOS)
-#### GroupDocs.Annotation
+#### [Annotate & write on documents](https://github.com/groupdocs-annotation/GroupDocs.Annotation-for-Java-Spring) with GroupDocs.Annotation
 - Clean, modern and intuitive design
 - Easily switchable colour theme (create your own colour theme in 5 minutes)
 - Responsive design
@@ -103,7 +135,7 @@ Coming soon
 - Multi-language support for displaying errors
 - Cross-browser support (Safari, Chrome, Opera, Firefox)
 - Cross-platform support (Windows, Linux, MacOS)
-#### GroupDocs.Comparison
+#### [Compare documents](https://github.com/groupdocs-comparison/GroupDocs.comparison-for-Java-Spring) with GroupDocs.Comparison
 - Clean, modern and intuitive design
 - Easily switchable colour theme (create your own colour theme in 5 minutes)
 - Responsive design
@@ -166,7 +198,7 @@ java -jar total-spring-0.4.47.jar configuration.yaml
 ```
 
 #### Docker image
-Use [docker](https://www.docker.com/) image.
+Use [docker image](https://hub.docker.com/u/groupdocs).
 
 ```bash
 mkdir DocumentSamples
@@ -175,8 +207,19 @@ docker run -p 8080:8080 --env application.hostAddress=localhost -v `pwd`/Documen
 ## Open http://localhost:8080/ in your favorite browser.
 ```
 
-#### Configuration
+## Configuration
 For all methods above you can adjust settings in `configuration.yml`. By default in this sample will lookup for license file in `./Licenses` folder, so you can simply put your license file in that folder or specify relative/absolute path by setting `licensePath` value in `configuration.yml`. 
+
+## License
+The MIT License (MIT). 
+
+Please have a look at the LICENSE.md for more details
+
+## GroupDocs Total on other platforms & frameworks
+
+- [GroupDocs.Total with JAVA Dropwizard ](https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Dropwizard)
+- [GroupDocs.Total with .NET MVC](https://github.com/groupdocs-total/GroupDocs.Total-for-.NET-MVC) 
+- [GroupDocs.Total with .NET WebForms ](https://github.com/groupdocs-total/GroupDocs.Total-for-.NET-WebForms)
 
 ## Resources
 - **Website:** [www.groupdocs.com](http://www.groupdocs.com)
