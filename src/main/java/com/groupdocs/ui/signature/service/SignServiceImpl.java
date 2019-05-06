@@ -31,7 +31,7 @@ import java.util.List;
 
 import static com.groupdocs.ui.signature.SignatureType.QR_CODE;
 import static com.groupdocs.ui.signature.service.SignatureHandlerFactory.createStreamHandler;
-import static com.groupdocs.ui.signature.service.SignatureHandlerFactory.getFullDataPath;
+import static com.groupdocs.ui.signature.service.SignatureHandlerFactory.getFullDataPathStr;
 import static com.groupdocs.ui.util.directory.SignatureDirectory.*;
 
 @Service
@@ -174,7 +174,7 @@ public class SignServiceImpl implements SignService {
      * @return
      */
     private void signStamp(String documentType, List<SignatureDataEntity> stamps, SignatureOptionsCollection signsCollection) {
-        String xmlPath = getFullDataPath(signatureConfiguration.getDataDirectory(), STAMP_DATA_DIRECTORY.getXMLPath());
+        String xmlPath = getFullDataPathStr(signatureConfiguration.getDataDirectory(), STAMP_DATA_DIRECTORY.getXMLPath());
         try {
             for (int i = 0; i < stamps.size(); i++) {
                 SignatureDataEntity signatureDataEntity = stamps.get(i);
@@ -208,7 +208,7 @@ public class SignServiceImpl implements SignService {
                 SignatureDataEntity signatureDataEntity = codes.get(i);
                 // get xml files root path
                 String signatureType = signatureDataEntity.getSignatureType();
-                String xmlPath = getFullDataPath(signatureConfiguration.getDataDirectory(), (QR_CODE.equals(signatureType)) ?
+                String xmlPath = getFullDataPathStr(signatureConfiguration.getDataDirectory(), (QR_CODE.equals(signatureType)) ?
                         QRCODE_DATA_DIRECTORY.getXMLPath() :
                         BARCODE_DATA_DIRECTORY.getXMLPath());
                 // get xml data of the QR-Code

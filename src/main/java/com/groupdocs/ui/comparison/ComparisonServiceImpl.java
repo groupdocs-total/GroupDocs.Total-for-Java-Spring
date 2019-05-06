@@ -66,7 +66,7 @@ public class ComparisonServiceImpl implements ComparisonService {
             resultDirectory = filesDirectory + File.separator + "Temp";
             comparisonConfiguration.setResultDirectory(resultDirectory);
         }
-        DefaultDirectories.makeDirs(new File(resultDirectory));
+        DefaultDirectories.makeDirs(Paths.get(resultDirectory));
         // set GroupDocs license
         try {
             License license = new License();
