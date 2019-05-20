@@ -57,18 +57,17 @@ public class ConversionServiceImpl implements ConversionService {
         String filesDirectory = conversionConfiguration.getFilesDirectory();
         String resultDirectory = conversionConfiguration.getResultDirectory();
         DefaultDirectories.makeDirs(Paths.get(resultDirectory));
+        ConversionConfig conversionConfig = new ConversionConfig();
+        conversionConfig.setStoragePath(filesDirectory);
+        conversionConfig.setOutputPath(resultDirectory);
         // set GroupDocs license
         try {
             License license = new License();
             license.setLicense(globalConfiguration.getApplication().getLicensePath());
-            ConversionConfig conversionConfig = new ConversionConfig();
-            conversionConfig.setStoragePath(filesDirectory);
-            conversionConfig.setOutputPath(resultDirectory);
-
-            handler = new ConversionHandler(conversionConfig);
         } catch (Throwable exc) {
             logger.error("Can not verify Conversion license!");
         }
+        handler = new ConversionHandler(conversionConfig);
     }
 
     /**
