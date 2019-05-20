@@ -68,6 +68,7 @@ public class ConversionServiceImpl implements ConversionService {
             logger.error("Can not verify Conversion license!");
         }
         handler = new ConversionHandler(conversionConfig);
+        handler.getPossibleConversions("pdf");
     }
 
     /**

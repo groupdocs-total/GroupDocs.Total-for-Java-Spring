@@ -91,26 +91,6 @@ public class ConversionControllerTest {
     }
 
     @Test
-    public void convertDocxToPdf() throws Exception {
-        new File("src/test/resources/Converted/calibre.pdf").delete();
-
-        File testFile = new File("src/test/resources/calibre.docx");
-
-        ConversionPostedData conversionRequest = new ConversionPostedData();
-        conversionRequest.setGuid(testFile.getAbsolutePath());
-        conversionRequest.setDestinationType("pdf");
-
-        mvc.perform(post("/conversion/convert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new Gson().toJson(conversionRequest))
-        ).andExpect(status().isOk());
-
-        assertTrue(new File("src/test/resources/Converted/calibre.pdf").exists());
-
-    }
-
-
-    @Test
     public void convertDocxToXls() throws Exception {
         new File("src/test/resources/Converted/calibre.xls").delete();
 
@@ -155,25 +135,4 @@ public class ConversionControllerTest {
                 .andExpect(header().string("Content-Disposition","attachment; filename=calibre.zip"));
     }
 
-    @Test
-    public void downloadDocument() throws Exception {
-        new File("src/test/resources/Converted/calibre.pdf").delete();
-
-        File testFile = new File("src/test/resources/calibre.docx");
-
-        ConversionPostedData conversionRequest = new ConversionPostedData();
-        conversionRequest.setGuid(testFile.getAbsolutePath());
-        conversionRequest.setDestinationType("pdf");
-
-        mvc.perform(post("/conversion/convert")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(new Gson().toJson(conversionRequest))
-        ).andExpect(status().isOk());
-
-        assertTrue(new File("src/test/resources/Converted/calibre.pdf").exists());
-
-        mvc.perform(get("/conversion/downloadDocument/?path=calibre.pdf"))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Content-Disposition","attachment; filename=calibre.pdf"));
-    }
 }
