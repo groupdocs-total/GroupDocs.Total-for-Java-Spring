@@ -157,10 +157,10 @@ Coming soon
 - Easily switchable colour theme (create your own colour theme in 5 minutes)
 - Responsive design
 - Convert individual documents
-- Batch convert multiple files
+- Batch convert multiple documents
 - Mobile support (open application on any mobile device)
 - HTML and image modes
-- Convert documents
+- Drag and drop support
 - Upload documents
 - Cross-browser support (Safari, Chrome, Opera, Firefox)
 - Cross-platform support (Windows, Linux, MacOS)
