@@ -149,6 +149,12 @@
         </dependency>
         <dependency>
             <groupId>com.groupdocs</groupId>
+            <artifactId>groupdocs-conversion</artifactId>
+            <version>19.4</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.groupdocs</groupId>
             <artifactId>groupdocs-signature</artifactId>
             <version>19.1</version>
             <type>jar</type>
