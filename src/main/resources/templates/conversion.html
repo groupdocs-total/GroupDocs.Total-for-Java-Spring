@@ -14,6 +14,8 @@
     <link type="text/css" rel="stylesheet" th:href="@{'/assets/conversion/css/conversion.mobile.css'}"/>
     <script type="text/javascript" th:src="@{'/assets/common/js/jquery.min.js'}"></script>
     <script type="text/javascript" th:src="@{'/assets/common/js/swiper.min.js'}"></script>
+    <script type="text/javascript" th:src="@{'/assets/viewer/js/viewer.js'}"></script>
+    <script type="text/javascript" th:src="@{'/assets/conversion/js/tooltipster.bundle.min.js'}"></script>
     <script type="text/javascript" th:src="@{'/assets/conversion/js/conversion.js'}"></script>
 </head>
 <body>
@@ -22,8 +24,8 @@
     /*<![CDATA[*/
     $('#element').conversion({
         applicationPath: window.location.href,
-        download: /*[[${comparisonConfiguration.download}]]*/'',
-        upload: /*[[${comparisonConfiguration.upload}]]*/'',
+        download: /*[[${conversionConfiguration.download}]]*/'',
+        upload: /*[[${conversionConfiguration.upload}]]*/'',
     });
     /*]]>*/
 </script>
