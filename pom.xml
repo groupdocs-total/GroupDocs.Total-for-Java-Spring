@@ -274,6 +274,15 @@
                             <arguments>copy</arguments>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>gulp config</id>
+                        <goals>
+                            <goal>gulp</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>config</arguments>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
