@@ -8,6 +8,6 @@ gulp.task('build', function() {
 
 gulp.task('copy', function() {
   return gulp
-      .src('./node_modules/@groupdocs.total-angular/viewer/dist/**')
+      .src('./node_modules/@groupdocs.examples.angular/viewer/dist/**')
       .pipe(gulp.dest('./src/main/resources/static/'))
-})
+});
