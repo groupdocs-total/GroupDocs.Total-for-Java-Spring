@@ -1,5 +1,5 @@
 # GroupDocs.Total for Java Spring Example
-###### version 0.4.55
+###### version 0.4.56
 
 [![Build Status](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring.svg?branch=master)](https://travis-ci.org/groupdocs-total/GroupDocs.Total-for-Java-Spring)
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a67135407f3b0dab72a/maintainability)](https://codeclimate.com/github/groupdocs-total/GroupDocs.Total-for-Java-Spring/maintainability)
@@ -200,10 +200,10 @@ Download [latest release](https://github.com/groupdocs-total/GroupDocs.Total-for
 **Note**: This method is **recommended** for running this sample behind firewall.
 
 ```bash
-curl -J -L -o release.tar.gz https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/releases/download/0.4.55/release.tar.gz
+curl -J -L -o release.tar.gz https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/releases/download/0.4.56/release.tar.gz
 tar -xvzf release.tar.gz
 cd release
-java -jar total-spring-0.4.55.jar configuration.yaml
+java -jar total-spring-0.4.56.jar configuration.yaml
 ## Open http://localhost:8080/ in your favorite browser.
 ```
 
