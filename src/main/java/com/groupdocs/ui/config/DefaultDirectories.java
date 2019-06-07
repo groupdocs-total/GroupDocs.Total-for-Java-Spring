@@ -19,6 +19,7 @@ public class DefaultDirectories {
     public static final String COMPARISON = "Comparison";
     public static final String ANNOTATION = "Annotation";
     public static final String CONVERSION = "Conversion";
+    public static final String EDITOR = "Editor";
 
     public static String defaultLicenseDirectory() {
         Path defaultLicFolder = FileSystems.getDefault().getPath(LICENSES).toAbsolutePath();
@@ -51,6 +52,10 @@ public class DefaultDirectories {
     }
 
     public static String defaultConversionDirectory() { return getDefaultFilesDir(CONVERSION); }
+
+    public static String defaultEditorDirectory() {
+        return getDefaultFilesDir(EDITOR);
+    }
 
     public static String getDefaultFilesDir(String folder) {
         String dir = DOCUMENT_SAMPLES + File.separator + folder;
