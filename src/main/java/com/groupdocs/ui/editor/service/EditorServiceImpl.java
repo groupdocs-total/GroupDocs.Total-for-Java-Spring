@@ -98,9 +98,8 @@ public class EditorServiceImpl implements EditorService {
         LoadDocumentEntity doc = new LoadDocumentEntity();
         try {
             InputHtmlDocument inputHtmlDocument = EditorHandler.toHtml(new FileInputStream(loadDocumentRequest.getGuid()));
-            String content = inputHtmlDocument.getContent();
             PageDescriptionEntity page = new PageDescriptionEntity();
-            page.setData(content);
+            page.setData(inputHtmlDocument.getEmbeddedHtml());
             page.setNumber(0);
             List<PageDescriptionEntity> pages = new ArrayList<>();
             pages.add(page);
@@ -111,5 +110,10 @@ public class EditorServiceImpl implements EditorService {
             throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
         return doc;
+    }
+
+    @Override
+    public Set<String> getSupportedFormats() {
+        return SUPPORTED_FORMATS;
     }
 }

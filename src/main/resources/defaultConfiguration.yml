@@ -221,3 +221,4 @@ editor:
   # Default document
   # Absolute path to default document
   defaultDocument:
+  createNewFile: true

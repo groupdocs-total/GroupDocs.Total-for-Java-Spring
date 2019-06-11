@@ -21,6 +21,9 @@ public class EditorConfiguration extends CommonConfiguration {
     @Value("${editor.defaultDocument}")
     private String defaultDocument;
 
+    @Value("#{new Boolean('${editor.createNewFile}')}")
+    private Boolean createNewFile;
+
     @PostConstruct
     public void init() {
         this.filesDirectory = StringUtils.isEmpty(this.filesDirectory) ? defaultEditorDirectory() : relativePathToAbsolute(this.filesDirectory);
@@ -50,12 +53,21 @@ public class EditorConfiguration extends CommonConfiguration {
         this.defaultDocument = defaultDocument;
     }
 
+    public Boolean getCreateNewFile() {
+        return createNewFile;
+    }
+
+    public void setCreateNewFile(Boolean createNewFile) {
+        this.createNewFile = createNewFile;
+    }
+
     @Override
     public String toString() {
         return "EditorConfiguration{" +
                 "filesDirectory='" + filesDirectory + '\'' +
                 ", fontsDirectory='" + fontsDirectory + '\'' +
                 ", defaultDocument='" + defaultDocument + '\'' +
+                ", createNewFile=" + createNewFile +
                 '}';
     }
 }

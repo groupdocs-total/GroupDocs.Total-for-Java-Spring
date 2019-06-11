@@ -6,6 +6,7 @@ import com.groupdocs.ui.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.model.response.LoadDocumentEntity;
 
 import java.util.List;
+import java.util.Set;
 
 public interface EditorService {
     List<FileDescriptionEntity> getFileList(String path);
@@ -13,4 +14,11 @@ public interface EditorService {
     EditorConfiguration getEditorConfiguration();
 
     LoadDocumentEntity loadDocument(LoadDocumentRequest loadDocumentRequest);
+
+    /**
+     * Get supported formats
+     *
+     * @return
+     */
+    Set<String> getSupportedFormats();
 }

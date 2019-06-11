@@ -7,18 +7,21 @@ import com.groupdocs.ui.model.request.FileTreeRequest;
 import com.groupdocs.ui.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.model.response.LoadDocumentEntity;
+import com.groupdocs.ui.model.response.UploadedDocumentEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
+import static com.groupdocs.ui.util.Utils.uploadFile;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
 @Controller
 @RequestMapping(value = "/editor")
@@ -60,5 +63,37 @@ public class EditorController {
     @ResponseBody
     public LoadDocumentEntity loadDocumentDescription(@RequestBody LoadDocumentRequest loadDocumentRequest) {
         return editorService.loadDocument(loadDocumentRequest);
+    }
+
+    /**
+     * Get supported formats
+     *
+     * @return
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/loadFormats", produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Set<String> loadFormats() {
+        return editorService.getSupportedFormats();
+    }
+
+    /**
+     * Upload document
+     *
+     * @return uploaded document object (the object contains uploaded document guid)
+     */
+    @RequestMapping(method = RequestMethod.POST, value = "/uploadDocument",
+            consumes = MULTIPART_FORM_DATA_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public UploadedDocumentEntity uploadDocument(@Nullable @RequestParam("file") MultipartFile content,
+                                                 @RequestParam(value = "url", required = false) String url,
+                                                 @RequestParam("rewrite") Boolean rewrite) {
+        // get documents storage path
+        String documentStoragePath = editorService.getEditorConfiguration().getFilesDirectory();
+        // upload the file
+        String pathToFile = uploadFile(documentStoragePath, content, url, rewrite);
+        // create response data
+        UploadedDocumentEntity uploadedDocument = new UploadedDocumentEntity();
+        uploadedDocument.setGuid(pathToFile);
+        return uploadedDocument;
     }
 }
