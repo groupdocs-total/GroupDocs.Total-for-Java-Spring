@@ -18,6 +18,9 @@ public class EditorConfiguration extends CommonConfiguration {
     @Value("${editor.fontsDirectory}")
     private String fontsDirectory;
 
+    @Value("${editor.defaultDocument}")
+    private String defaultDocument;
+
     @PostConstruct
     public void init() {
         this.filesDirectory = StringUtils.isEmpty(this.filesDirectory) ? defaultEditorDirectory() : relativePathToAbsolute(this.filesDirectory);
@@ -39,11 +42,20 @@ public class EditorConfiguration extends CommonConfiguration {
         this.fontsDirectory = fontsDirectory;
     }
 
+    public String getDefaultDocument() {
+        return defaultDocument;
+    }
+
+    public void setDefaultDocument(String defaultDocument) {
+        this.defaultDocument = defaultDocument;
+    }
+
     @Override
     public String toString() {
         return "EditorConfiguration{" +
                 "filesDirectory='" + filesDirectory + '\'' +
                 ", fontsDirectory='" + fontsDirectory + '\'' +
+                ", defaultDocument='" + defaultDocument + '\'' +
                 '}';
     }
 }

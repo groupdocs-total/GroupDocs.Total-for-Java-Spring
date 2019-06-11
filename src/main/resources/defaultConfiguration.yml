@@ -218,3 +218,6 @@ editor:
   # Fonts path
   # Absolute path to custom fonts directory
   fontsDirectory:
+  # Default document
+  # Absolute path to default document
+  defaultDocument:
