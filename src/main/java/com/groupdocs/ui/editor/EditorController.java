@@ -1,6 +1,7 @@
 package com.groupdocs.ui.editor;
 
 import com.groupdocs.ui.config.GlobalConfiguration;
+import com.groupdocs.ui.editor.model.EditDocumentRequest;
 import com.groupdocs.ui.editor.model.EditorConfiguration;
 import com.groupdocs.ui.editor.service.EditorService;
 import com.groupdocs.ui.model.request.FileTreeRequest;
@@ -34,7 +35,6 @@ public class EditorController {
 
     @Autowired
     private EditorService editorService;
-
 
     /**
      * Get files and directories
@@ -74,6 +74,12 @@ public class EditorController {
     @ResponseBody
     public Set<String> loadFormats() {
         return editorService.getSupportedFormats();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "saveFile", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public LoadDocumentEntity saveFile(@RequestBody EditDocumentRequest loadDocumentEntity) {
+        return editorService.saveDoc(loadDocumentEntity);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.groupdocs.ui.editor.service;
 
+import com.groupdocs.ui.editor.model.EditDocumentRequest;
 import com.groupdocs.ui.editor.model.EditorConfiguration;
 import com.groupdocs.ui.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
@@ -21,4 +22,6 @@ public interface EditorService {
      * @return
      */
     Set<String> getSupportedFormats();
+
+    LoadDocumentEntity saveDoc(EditDocumentRequest loadDocumentEntity);
 }
