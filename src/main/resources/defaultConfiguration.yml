@@ -221,4 +221,5 @@ editor:
   # Default document
   # Absolute path to default document
   defaultDocument:
+  # Enable / disable new document creation
   createNewFile: true

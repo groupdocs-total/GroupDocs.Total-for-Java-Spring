@@ -17,9 +17,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 
+import static com.groupdocs.ui.util.Utils.setLocalPort;
 import static com.groupdocs.ui.util.Utils.uploadFile;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -35,6 +37,18 @@ public class EditorController {
 
     @Autowired
     private EditorService editorService;
+
+    /**
+     * Get editor page
+     *
+     * @param request http request
+     * @return template name
+     */
+    @RequestMapping(method = RequestMethod.GET)
+    public String getView(HttpServletRequest request) {
+        setLocalPort(request, globalConfiguration.getServer());
+        return "editor";
+    }
 
     /**
      * Get files and directories
