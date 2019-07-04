@@ -4,14 +4,11 @@ import com.groupdocs.ui.config.GlobalConfiguration;
 import com.groupdocs.ui.editor.model.EditDocumentRequest;
 import com.groupdocs.ui.editor.model.EditorConfiguration;
 import com.groupdocs.ui.editor.service.EditorService;
-import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.model.request.FileTreeRequest;
 import com.groupdocs.ui.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.model.response.LoadDocumentEntity;
 import com.groupdocs.ui.model.response.UploadedDocumentEntity;
-import com.groupdocs.ui.util.Utils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,18 +17,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 
-import static com.groupdocs.ui.util.Utils.setLocalPort;
-import static com.groupdocs.ui.util.Utils.uploadFile;
+import static com.groupdocs.ui.util.Utils.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -131,17 +122,6 @@ public class EditorController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/downloadDocument")
     public void downloadDocument(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
-        File file = new File(documentGuid);
-        // set response content info
-        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
-        // download the document
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
-             ServletOutputStream outputStream = response.getOutputStream()) {
-
-            IOUtils.copyLarge(inputStream, outputStream);
-        } catch (Exception ex) {
-            logger.error("Exception in downloading document", ex);
-            throw new TotalGroupDocsException(ex.getMessage(), ex);
-        }
+        downloadFile(documentGuid, response);
     }
 }

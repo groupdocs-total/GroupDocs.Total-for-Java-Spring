@@ -84,18 +84,7 @@ public class ComparisonController {
                                  @RequestParam(name = "ext", required = false) String ext,
                                  HttpServletResponse response) {
         String filePath = comparisonService.calculateResultFileName(documentGuid, index, ext);
-        File file = new File(filePath);
-        // set response content info
-        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
-        // download the document
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(filePath));
-             ServletOutputStream outputStream = response.getOutputStream()) {
-
-            IOUtils.copyLarge(inputStream, outputStream);
-        } catch (Exception ex){
-            logger.error("Exception in downloading document", ex);
-            throw new TotalGroupDocsException(ex.getMessage(), ex);
-        }
+        downloadFile(filePath, response);
     }
 
     /**

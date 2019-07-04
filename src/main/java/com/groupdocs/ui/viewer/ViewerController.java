@@ -31,8 +31,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import static com.groupdocs.ui.util.Utils.setLocalPort;
-import static com.groupdocs.ui.util.Utils.uploadFile;
+import static com.groupdocs.ui.util.Utils.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
 
@@ -168,18 +167,7 @@ public class ViewerController {
      */
     @RequestMapping(method = RequestMethod.GET, value = "/downloadDocument")
     public void downloadDocument(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
-        File file = new File(documentGuid);
-        // set response content info
-        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
-        // download the document
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
-             ServletOutputStream outputStream = response.getOutputStream()) {
-
-            IOUtils.copyLarge(inputStream, outputStream);
-        } catch (Exception ex) {
-            logger.error("Exception in downloading document", ex);
-            throw new TotalGroupDocsException(ex.getMessage(), ex);
-        }
+        downloadFile(documentGuid, response);
     }
 
     /**

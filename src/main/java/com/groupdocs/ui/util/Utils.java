@@ -11,15 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +50,27 @@ public class Utils {
     public static void setLocalPort(HttpServletRequest request, ServerConfiguration server) {
         if (server.getHttpPort() == null) {
             server.setHttpPort(request.getLocalPort());
+        }
+    }
+
+    /**
+     * Download the file into response output stream
+     *
+     * @param documentGuid
+     * @param response
+     */
+    public static void downloadFile(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
+        File file = new File(documentGuid);
+        // set response content info
+        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
+        // download the document
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            IOUtils.copyLarge(inputStream, outputStream);
+        } catch (Exception ex) {
+            logger.error("Exception in downloading document", ex);
+            throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
     }
 
