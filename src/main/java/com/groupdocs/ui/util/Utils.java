@@ -94,17 +94,23 @@ public class Utils {
      * @param ex
      * @return
      */
-    public static String getExceptionMessage(String password, GroupDocsViewerException ex) {
+    public static String getExceptionMessage(String password, Exception ex) {
         // Set exception message
         String message = ex.getMessage();
-        if (GroupDocsViewerException.class.isAssignableFrom(InvalidPasswordException.class) && StringUtils.isEmpty(password)) {
+        if (isAssignableFromException(ex) && StringUtils.isEmpty(password)) {
             message = PASSWORD_REQUIRED;
-        } else if (GroupDocsViewerException.class.isAssignableFrom(InvalidPasswordException.class) && !StringUtils.isEmpty(password)) {
+        } else if (isAssignableFromException(ex) && !StringUtils.isEmpty(password)) {
             message = INCORRECT_PASSWORD;
         } else {
             logger.error(message, ex);
         }
         return message;
+    }
+
+    public static boolean isAssignableFromException(Exception ex) {
+        return ex.getClass().isAssignableFrom(InvalidPasswordException.class) ||
+                ex.getClass().getSuperclass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class) ||
+                ex.getClass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class);
     }
 
     /**

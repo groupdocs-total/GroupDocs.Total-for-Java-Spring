@@ -19,7 +19,6 @@ import com.groupdocs.ui.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.model.response.LoadDocumentEntity;
 import com.groupdocs.ui.model.response.PageDescriptionEntity;
-import com.groupdocs.viewer.exception.GroupDocsViewerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -242,7 +241,7 @@ public class ComparisonServiceImpl implements ComparisonService {
                 logger.error("Exception occurred while loading result page", ex);
                 throw new TotalGroupDocsException("Exception occurred while loading result page", ex);
             }
-        } catch (GroupDocsViewerException ex) {
+        } catch (Exception ex) {
             throw new TotalGroupDocsException(getExceptionMessage(loadDocumentPageRequest.getPassword(), ex), ex);
         }
     }
@@ -268,7 +267,7 @@ public class ComparisonServiceImpl implements ComparisonService {
             List<PageDescriptionEntity> pageDescriptionEntities = loadPages(loadDocumentRequest.getGuid(), loadDocumentRequest.getPassword());
             loadDocumentEntity.setPages(pageDescriptionEntities);
             return loadDocumentEntity;
-        } catch (GroupDocsViewerException ex) {
+        } catch (Exception ex) {
             throw new TotalGroupDocsException(getExceptionMessage(loadDocumentRequest.getPassword(), ex), ex);
         }
     }
