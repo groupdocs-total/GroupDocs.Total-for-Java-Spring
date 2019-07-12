@@ -41,6 +41,21 @@ public class Utils {
     public static final FileTypeComparator FILE_TYPE_COMPARATOR = new FileTypeComparator();
     public static final FileDateComparator FILE_DATE_COMPARATOR = new FileDateComparator();
 
+    public static void downloadFile(@RequestParam(name = "guid") String documentGuid, HttpServletResponse response) {
+        File file = new File(documentGuid);
+        // set response content info
+        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
+        // download the document
+        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
+             ServletOutputStream outputStream = response.getOutputStream()) {
+
+            IOUtils.copyLarge(inputStream, outputStream);
+        } catch (Exception ex) {
+            logger.error("Exception in downloading document", ex);
+            throw new TotalGroupDocsException(ex.getMessage(), ex);
+        }
+    }
+
     /**
      * Set local port from request to config
      *
@@ -108,7 +123,8 @@ public class Utils {
     }
 
     public static boolean isAssignableFromException(Exception ex) {
-        return ex.getClass().isAssignableFrom(InvalidPasswordException.class) ||
+        return ex.getClass().isAssignableFrom(GroupDocsViewerException.class) ||
+                ex.getClass().isAssignableFrom(InvalidPasswordException.class) ||
                 ex.getClass().getSuperclass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class) ||
                 ex.getClass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class);
     }
