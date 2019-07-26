@@ -39,6 +39,13 @@ public class ComparisonController {
     @Autowired
     private ComparisonService comparisonService;
 
+
+    @RequestMapping(method = RequestMethod.GET, value = "/loadConfig", produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ComparisonConfiguration loadConfig() {
+        return comparisonService.getComparisonConfiguration();
+    }
+
     /**
      * Get comparison page
      *
