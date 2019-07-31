@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -41,21 +40,6 @@ public class Utils {
     public static final FileTypeComparator FILE_TYPE_COMPARATOR = new FileTypeComparator();
     public static final FileDateComparator FILE_DATE_COMPARATOR = new FileDateComparator();
 
-    public static void downloadFile(@RequestParam(name = "guid") String documentGuid, HttpServletResponse response) {
-        File file = new File(documentGuid);
-        // set response content info
-        Utils.addFileDownloadHeaders(response, file.getName(), file.length());
-        // download the document
-        try (InputStream inputStream = new BufferedInputStream(new FileInputStream(documentGuid));
-             ServletOutputStream outputStream = response.getOutputStream()) {
-
-            IOUtils.copyLarge(inputStream, outputStream);
-        } catch (Exception ex) {
-            logger.error("Exception in downloading document", ex);
-            throw new TotalGroupDocsException(ex.getMessage(), ex);
-        }
-    }
-
     /**
      * Set local port from request to config
      *
@@ -74,7 +58,7 @@ public class Utils {
      * @param documentGuid
      * @param response
      */
-    public static void downloadFile(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
+    public static void downloadFile(String documentGuid, HttpServletResponse response) {
         File file = new File(documentGuid);
         // set response content info
         Utils.addFileDownloadHeaders(response, file.getName(), file.length());
