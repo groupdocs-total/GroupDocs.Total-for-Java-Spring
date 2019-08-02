@@ -3,8 +3,6 @@ package com.groupdocs.ui.comparison;
 import com.google.common.collect.Ordering;
 import com.groupdocs.comparison.Comparer;
 import com.groupdocs.comparison.common.PageImage;
-import com.groupdocs.comparison.common.TypeChanged;
-import com.groupdocs.comparison.common.changes.ChangeInfo;
 import com.groupdocs.comparison.common.compareresult.ICompareResult;
 import com.groupdocs.comparison.common.comparisonsettings.ComparisonSettings;
 import com.groupdocs.comparison.common.license.License;
@@ -26,7 +24,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -101,18 +101,12 @@ public class ComparisonServiceImpl implements ComparisonService {
         }
         File directory = new File(currentPath);
         List<FileDescriptionEntity> fileList = new ArrayList<>();
-        List<File> filesList = Arrays.asList(directory.listFiles());
+        List<File> filesList = Ordering.from(FILE_TYPE_COMPARATOR).compound(FILE_NAME_COMPARATOR)
+                .sortedCopy(Arrays.asList(directory.listFiles()));
         try {
-            // sort list of files and folders
-            filesList = Ordering.from(FILE_TYPE_COMPARATOR).compound(FILE_NAME_COMPARATOR).sortedCopy(filesList);
             for (File file : filesList) {
-                // check if current file/folder is hidden
-                if (file.isHidden()) {
-                    // ignore current file and skip to next one
-                    continue;
-                } else {
+                if (!file.isHidden()) {
                     FileDescriptionEntity fileDescription = getFileDescriptionEntity(file);
-                    // add object to array list
                     fileList.add(fileDescription);
                 }
             }
@@ -157,24 +151,23 @@ public class ComparisonServiceImpl implements ComparisonService {
         //TODO: remove this synchronization when the bug COMPARISONJAVA-436 is fixed
         synchronized (this) {
             compareResult = compareFiles(loadDocumentRequestFirst, loadDocumentRequestSecond);
-            compareResultRevers = compareFiles(loadDocumentRequestSecond, loadDocumentRequestFirst);
         }
 
         String extension = parseFileExtension(firstPath);
         try {
-            return getCompareResultResponse(extension, compareResult, compareResultRevers);
+            return getCompareResultResponse(extension, compareResult);
         } catch (Exception e) {
             throw new TotalGroupDocsException(e.getMessage());
         }
     }
 
-    protected CompareResultResponse getCompareResultResponse(String fileExt, ICompareResult compareResult, ICompareResult compareResultRevers) throws Exception {
-        if (compareResult == null || compareResultRevers == null) {
+    protected CompareResultResponse getCompareResultResponse(String fileExt, ICompareResult compareResult) throws Exception {
+        if (compareResult == null) {
             throw new TotalGroupDocsException("Something went wrong. We've got null result.");
         }
 
         boolean isHtml = HTML.equals(fileExt) || HTM.equals(fileExt);
-        CompareResultResponse compareResultResponse = createCompareResultResponse(compareResult, compareResultRevers, isHtml);
+        CompareResultResponse compareResultResponse = createCompareResultResponse(compareResult, isHtml);
 
         String guid = UUID.randomUUID().toString();
         String savedFile = saveFile(guid, compareResult.getStream(), fileExt);
@@ -193,16 +186,10 @@ public class ComparisonServiceImpl implements ComparisonService {
      * @param isHtml
      * @return results response
      */
-    private CompareResultResponse createCompareResultResponse(ICompareResult compareResult, ICompareResult compareResultRevers, boolean isHtml) throws Exception {
+    private CompareResultResponse createCompareResultResponse(ICompareResult compareResult, boolean isHtml) throws Exception {
         CompareResultResponse compareResultResponse = new CompareResultResponse();
 
-        List<ChangeInfo> changeInfoList = new ArrayList<>();
-        ChangeInfo[] changes = compareResult.getChanges();
-        addChanges(changeInfoList, changes);
-        ChangeInfo[] reversChanges = compareResultRevers.getChanges();
-        addReversChanges(changeInfoList, reversChanges);
-
-        compareResultResponse.setChanges(changeInfoList.toArray(new ChangeInfo[changeInfoList.size()]));
+        compareResultResponse.setChanges(compareResult.getChanges());
 
         if (isHtml) {
             String resultDirectory = getResultDirectory();
@@ -210,25 +197,6 @@ public class ComparisonServiceImpl implements ComparisonService {
         }
 
         return compareResultResponse;
-    }
-
-    private void addReversChanges(List<ChangeInfo> changeInfoList, ChangeInfo[] changes) {
-        for (int i = 0; i < changes.length; i++) {
-            ChangeInfo change = changes[i];
-            if (TypeChanged.Deleted != change.getType()) {
-                changeInfoList.add(change);
-            }
-        }
-    }
-
-    private void addChanges(List<ChangeInfo> changeInfoList, ChangeInfo[] reversChanges) {
-        for (int i = 0; i < reversChanges.length; i++) {
-            ChangeInfo reversChange = reversChanges[i];
-            if (TypeChanged.Inserted == reversChange.getType()) {
-                reversChange.setType(TypeChanged.Deleted);
-                changeInfoList.add(reversChange);
-            }
-        }
     }
 
     /**
