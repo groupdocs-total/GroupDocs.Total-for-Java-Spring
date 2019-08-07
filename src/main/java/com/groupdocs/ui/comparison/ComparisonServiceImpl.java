@@ -190,15 +190,7 @@ public class ComparisonServiceImpl implements ComparisonService {
         CompareResultResponse compareResultResponse = new CompareResultResponse();
 
         // FIXME: temporary fix
-        ChangeInfo[] changes = compareResult.getChanges();
-        for (int i = 0; i < changes.length; i++) {
-            ChangeInfo change = changes[i];
-            if (DOC.equals(fileExt) || DOCX.equals(fileExt)) {
-                change.getBox().setY(change.getPageInfo().getHeight() - change.getBox().getY());
-            }
-            int id = change.getPageInfo().getId();
-            change.getPageInfo().setId(id > 0 ? id - 1 : id);
-        }
+        ChangeInfo[] changes = getChangeInfos(compareResult, fileExt);
 
         compareResultResponse.setChanges(changes);
 
@@ -209,6 +201,19 @@ public class ComparisonServiceImpl implements ComparisonService {
         }
 
         return compareResultResponse;
+    }
+
+    private ChangeInfo[] getChangeInfos(ICompareResult compareResult, String fileExt) {
+        ChangeInfo[] changes = compareResult.getChanges();
+        for (int i = 0; i < changes.length; i++) {
+            ChangeInfo change = changes[i];
+            if (DOC.equals(fileExt) || DOCX.equals(fileExt)) {
+                change.getBox().setY(change.getPageInfo().getHeight() - change.getBox().getY());
+            }
+            int id = change.getPageInfo().getId();
+            change.getPageInfo().setId(id > 0 ? id - 1 : id);
+        }
+        return changes;
     }
 
     /**
