@@ -94,12 +94,8 @@ public class ComparisonServiceImpl implements ComparisonService {
      */
     @Override
     public List<FileDescriptionEntity> loadFiles(FileTreeRequest fileTreeRequest) {
-        String currentPath = fileTreeRequest.getPath();
-        if (StringUtils.isEmpty(currentPath)) {
-            currentPath = comparisonConfiguration.getFilesDirectory();
-        } else {
-            currentPath = String.format("%s%s%s", comparisonConfiguration.getFilesDirectory(), File.separator, currentPath);
-        }
+        String currentPath = StringUtils.isEmpty(fileTreeRequest.getPath()) ? comparisonConfiguration.getFilesDirectory() :
+                String.format("%s%s%s", comparisonConfiguration.getFilesDirectory(), File.separator, fileTreeRequest.getPath());
         File directory = new File(currentPath);
         List<FileDescriptionEntity> fileList = new ArrayList<>();
         List<File> filesList = Ordering.from(FILE_TYPE_COMPARATOR).compound(FILE_NAME_COMPARATOR)
