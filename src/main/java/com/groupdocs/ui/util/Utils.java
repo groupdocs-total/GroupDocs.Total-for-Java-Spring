@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.ServletOutputStream;
@@ -59,7 +58,7 @@ public class Utils {
      * @param documentGuid
      * @param response
      */
-    public static void downloadFile(@RequestParam(name = "path") String documentGuid, HttpServletResponse response) {
+    public static void downloadFile(String documentGuid, HttpServletResponse response) {
         File file = new File(documentGuid);
         // set response content info
         Utils.addFileDownloadHeaders(response, file.getName(), file.length());
@@ -94,17 +93,24 @@ public class Utils {
      * @param ex
      * @return
      */
-    public static String getExceptionMessage(String password, GroupDocsViewerException ex) {
+    public static String getExceptionMessage(String password, Exception ex) {
         // Set exception message
         String message = ex.getMessage();
-        if (GroupDocsViewerException.class.isAssignableFrom(InvalidPasswordException.class) && StringUtils.isEmpty(password)) {
+        if (isAssignableFromException(ex) && StringUtils.isEmpty(password)) {
             message = PASSWORD_REQUIRED;
-        } else if (GroupDocsViewerException.class.isAssignableFrom(InvalidPasswordException.class) && !StringUtils.isEmpty(password)) {
+        } else if (isAssignableFromException(ex) && !StringUtils.isEmpty(password)) {
             message = INCORRECT_PASSWORD;
         } else {
             logger.error(message, ex);
         }
         return message;
+    }
+
+    public static boolean isAssignableFromException(Exception ex) {
+        return ex.getClass().isAssignableFrom(GroupDocsViewerException.class) ||
+                ex.getClass().isAssignableFrom(InvalidPasswordException.class) ||
+                ex.getClass().getSuperclass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class) ||
+                ex.getClass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class);
     }
 
     /**
