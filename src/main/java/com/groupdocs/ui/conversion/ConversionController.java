@@ -36,6 +36,12 @@ public class ConversionController {
     public ConversionService conversionService;
 
 
+    @RequestMapping(method = RequestMethod.GET, value = "/loadConfig", produces = APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ConversionConfiguration loadConfig() {
+        return conversionService.getConversionConfiguration();
+    }
+
     /**
      * Get conversion page
      * @param model model data for template
