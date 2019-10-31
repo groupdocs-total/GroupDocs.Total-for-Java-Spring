@@ -35,8 +35,7 @@ import java.util.List;
 
 import static com.groupdocs.ui.signature.SignatureType.*;
 import static com.groupdocs.ui.signature.service.SignatureHandlerFactory.getFullDataPathStr;
-import static com.groupdocs.ui.util.Utils.getStringFromStream;
-import static com.groupdocs.ui.util.Utils.uploadFile;
+import static com.groupdocs.ui.util.Utils.*;
 import static com.groupdocs.ui.util.directory.PathConstants.DATA_FOLDER;
 
 @Service
@@ -151,7 +150,7 @@ public class SignatureServiceImpl implements SignatureService {
             List<PageDescriptionEntity> pagesDescription = new ArrayList<>();
             // get info about each document page
             boolean loadData = signatureConfiguration.getPreloadPageCount() == 0;
-            for(int i = 1; i <= documentDescription.getPageCount(); i++) {
+            for (int i = 1; i <= documentDescription.getPageCount(); i++) {
                 PageDescriptionEntity description = getPageDescriptionEntity(documentGuid, password, i, loadData);
                 pagesDescription.add(description);
             }
@@ -162,7 +161,7 @@ public class SignatureServiceImpl implements SignatureService {
             return loadDocumentEntity;
         } catch (Exception ex) {
             logger.error("Exception occurred while loading document description", ex);
-            throw new TotalGroupDocsException(ex.getMessage(), ex);
+            throw new TotalGroupDocsException(getExceptionMessage(password, ex), ex);
         }
     }
 

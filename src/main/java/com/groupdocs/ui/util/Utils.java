@@ -1,5 +1,6 @@
 package com.groupdocs.ui.util;
 
+import com.aspose.words.IncorrectPasswordException;
 import com.groupdocs.ui.config.ServerConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.viewer.exception.GroupDocsViewerException;
@@ -107,7 +108,8 @@ public class Utils {
     }
 
     public static boolean isAssignableFromException(Exception ex) {
-        return ex.getClass().isAssignableFrom(GroupDocsViewerException.class) ||
+        return ex.getClass().isAssignableFrom(IncorrectPasswordException.class) ||
+                ex.getClass().isAssignableFrom(GroupDocsViewerException.class) ||
                 ex.getClass().isAssignableFrom(InvalidPasswordException.class) ||
                 ex.getClass().getSuperclass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class) ||
                 ex.getClass().isAssignableFrom(com.groupdocs.comparison.common.exceptions.InvalidPasswordException.class);
