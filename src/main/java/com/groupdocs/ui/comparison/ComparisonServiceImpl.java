@@ -217,9 +217,10 @@ public class ComparisonServiceImpl implements ComparisonService {
      */
     @Override
     public PageDescriptionEntity loadResultPage(LoadDocumentPageRequest loadDocumentPageRequest) {
+        String password = loadDocumentPageRequest.getPassword();
         try {
             Comparer comparer = new Comparer();
-            List<PageImage> pageImages = comparer.convertToImages(loadDocumentPageRequest.getGuid(), loadDocumentPageRequest.getPassword());
+            List<PageImage> pageImages = comparer.convertToImages(loadDocumentPageRequest.getGuid(), password);
             try {
                 PageImage pageImage = pageImages.get(loadDocumentPageRequest.getPage() - 1);
                 return getPageDescriptionEntity(pageImage);
@@ -227,8 +228,10 @@ public class ComparisonServiceImpl implements ComparisonService {
                 logger.error("Exception occurred while loading result page", ex);
                 throw new TotalGroupDocsException("Exception occurred while loading result page", ex);
             }
+        } catch (com.groupdocs.comparison.common.exceptions.InvalidPasswordException ex) {
+            throw new TotalGroupDocsException(getExceptionMessage(password), ex);
         } catch (Exception ex) {
-            throw new TotalGroupDocsException(getExceptionMessage(loadDocumentPageRequest.getPassword(), ex), ex);
+            throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
     }
 
@@ -254,7 +257,7 @@ public class ComparisonServiceImpl implements ComparisonService {
             loadDocumentEntity.setPages(pageDescriptionEntities);
             return loadDocumentEntity;
         } catch (Exception ex) {
-            throw new TotalGroupDocsException(getExceptionMessage(loadDocumentRequest.getPassword(), ex), ex);
+            throw new TotalGroupDocsException(getExceptionMessage(loadDocumentRequest.getPassword()), ex);
         }
     }
 

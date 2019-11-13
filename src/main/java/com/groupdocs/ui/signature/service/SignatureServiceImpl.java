@@ -1,5 +1,6 @@
 package com.groupdocs.ui.signature.service;
 
+import com.aspose.words.IncorrectPasswordException;
 import com.groupdocs.signature.domain.DocumentDescription;
 import com.groupdocs.signature.handler.SignatureHandler;
 import com.groupdocs.signature.licensing.License;
@@ -159,9 +160,11 @@ public class SignatureServiceImpl implements SignatureService {
             loadDocumentEntity.setPages(pagesDescription);
             // return document description
             return loadDocumentEntity;
+        } catch (IncorrectPasswordException ex) {
+            throw new TotalGroupDocsException(getExceptionMessage(password), ex);
         } catch (Exception ex) {
             logger.error("Exception occurred while loading document description", ex);
-            throw new TotalGroupDocsException(getExceptionMessage(password, ex), ex);
+            throw new TotalGroupDocsException(ex.getMessage(), ex);
         }
     }
 
