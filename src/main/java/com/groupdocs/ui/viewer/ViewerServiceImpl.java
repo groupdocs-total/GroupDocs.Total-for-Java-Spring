@@ -25,6 +25,7 @@ import com.groupdocs.viewer.domain.options.DocumentInfoOptions;
 import com.groupdocs.viewer.domain.options.FileListOptions;
 import com.groupdocs.viewer.domain.options.RotatePageOptions;
 import com.groupdocs.viewer.exception.InvalidPasswordException;
+import com.groupdocs.viewer.exception.PasswordProtectedFileException;
 import com.groupdocs.viewer.handler.ViewerHandler;
 import com.groupdocs.viewer.handler.ViewerHtmlHandler;
 import com.groupdocs.viewer.handler.ViewerImageHandler;
@@ -168,7 +169,8 @@ public class ViewerServiceImpl implements ViewerService {
 
             // return document description
             return getLoadDocumentEntity(documentGuid, password, documentInfoContainer, loadAllPages);
-        } catch (InvalidPasswordException ex) {
+        } catch (InvalidPasswordException
+                | PasswordProtectedFileException ex) {
             throw new TotalGroupDocsException(getExceptionMessage(password), ex);
         } catch (Exception ex) {
             logger.error("Exception in loading document", ex);
