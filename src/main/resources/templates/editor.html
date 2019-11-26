@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8" />
     <title>Editor</title>
@@ -9,15 +9,15 @@
 </head>
 <body>
 <client-root></client-root>
-<script src="angular/editor/runtime-es2015.js" type="module"></script>
-<script src="angular/editor/polyfills-es2015.js" type="module"></script>
-<script src="angular/editor/runtime-es5.js" nomodule></script>
-<script src="angular/editor/polyfills-es5.js" nomodule></script>
-<script src="angular/editor/styles-es2015.js" type="module"></script>
-<script src="angular/editor/styles-es5.js" nomodule></script>
-<script src="angular/editor/vendor-es2015.js" type="module"></script>
-<script src="angular/editor/main-es2015.js" type="module"></script>
-<script src="angular/editor/vendor-es5.js" nomodule></script>
-<script src="angular/editor/main-es5.js" nomodule></script>
+<script th:src="@{'/angular/editor/runtime-es2015.js'}" type="module"></script>
+<script th:src="@{'/angular/editor/polyfills-es2015.js'}" type="module"></script>
+<script th:src="@{'/angular/editor/runtime-es5.js'}" nomodule></script>
+<script th:src="@{'/angular/editor/polyfills-es5.js'}" nomodule></script>
+<script th:src="@{'/angular/editor/styles-es2015.js'}" type="module"></script>
+<script th:src="@{'/angular/editor/styles-es5.js'}" nomodule></script>
+<script th:src="@{'/angular/editor/vendor-es2015.js'}" type="module"></script>
+<script th:src="@{'/angular/editor/main-es2015.js'}" type="module"></script>
+<script th:src="@{'/angular/editor/vendor-es5.js'}" nomodule></script>
+<script th:src="@{'/angular/editor/main-es5.js'}" nomodule></script>
 </body>
 </html>
