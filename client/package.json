@@ -46,7 +46,7 @@
     "@groupdocs.examples.jquery/common": "^0.16.0",
     "@groupdocs.examples.jquery/total": "^0.16.0",
     "@groupdocs.examples.jquery/viewer": "^0.16.0",
-    "@nrwl/angular": "^8.11.0",
+    "@nrwl/angular": "^8.11.1",
     "common-components": "^1.0.5",
     "core-js": "^2.6.11",
     "rxjs": "~6.4.0",
