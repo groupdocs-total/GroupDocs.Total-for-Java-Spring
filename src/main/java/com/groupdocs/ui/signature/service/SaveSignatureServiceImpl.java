@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -158,11 +159,13 @@ public class SaveSignatureServiceImpl implements SaveSignatureService {
         String xmlPath = getFullDataPathStr(signatureConfiguration.getDataDirectory(), TEXT_DATA_DIRECTORY.getXMLPath());
         TextXmlEntity signatureData = saveTextRequest.getProperties();
         try {
-            File file = getFileWithUniqueName(xmlPath, signatureData.getImageGuid(), XML);
-            // Save data to xml file
-            String fileName = String.format("%s%s%s.xml", xmlPath, File.separator, FilenameUtils.removeExtension(file.getName()));
-            new XMLReaderWriter<TextXmlEntity>().write(fileName, signatureData);
-            signatureData.setImageGuid(fileName);
+            if (!StringUtils.isEmpty(signatureData.getText())) {
+                File file = getFileWithUniqueName(xmlPath, signatureData.getImageGuid(), XML);
+                // Save data to xml file
+                String fileName = String.format("%s%s%s.xml", xmlPath, File.separator, FilenameUtils.removeExtension(file.getName()));
+                new XMLReaderWriter<TextXmlEntity>().write(fileName, signatureData);
+                signatureData.setImageGuid(fileName);
+            }
         } catch (JAXBException e) {
             logger.error("Exception occurred while saving text signature", e);
             throw new TotalGroupDocsException(e.getMessage(), e);
