@@ -40,6 +40,9 @@
     },
     "annotation": {
       "tags": []
+    },
+    "annotation-e2e": {
+      "tags": []
     }
   }
 }
