@@ -149,6 +149,11 @@
         </dependency>
         <dependency>
             <groupId>com.groupdocs</groupId>
+            <artifactId>groupdocs-search</artifactId>
+            <version>19.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.groupdocs</groupId>
             <artifactId>groupdocs-viewer</artifactId>
             <version>19.8.1</version>
             <type>jar</type>

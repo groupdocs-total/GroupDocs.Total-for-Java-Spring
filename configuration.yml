@@ -219,3 +219,17 @@ editor:
   defaultDocument:
   # Enable / disable new document creation
   createNewFile: true
+
+################################################
+# GroupDocs.Search configurations
+################################################
+search:
+  # Files directory path
+  # Absolute or relative path to files directory
+  filesDirectory: DocumentSamples/Search
+  # Fonts path
+  # Absolute path to custom fonts directory
+  fontsDirectory:
+  # Default document
+  # Absolute path to default document
+  defaultDocument:
