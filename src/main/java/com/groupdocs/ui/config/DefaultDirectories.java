@@ -20,6 +20,7 @@ public class DefaultDirectories {
     public static final String ANNOTATION = "Annotation";
     public static final String CONVERSION = "Conversion";
     public static final String EDITOR = "Editor";
+    public static final String SEARCH = "Search";
 
     public static String defaultLicenseDirectory() {
         Path defaultLicFolder = FileSystems.getDefault().getPath(LICENSES).toAbsolutePath();
@@ -55,6 +56,10 @@ public class DefaultDirectories {
 
     public static String defaultEditorDirectory() {
         return getDefaultFilesDir(EDITOR);
+    }
+
+    public static String defaultSearchDirectory() {
+        return getDefaultFilesDir(SEARCH);
     }
 
     public static String getDefaultFilesDir(String folder) {
