@@ -1,21 +1,14 @@
 package com.groupdocs.ui.viewer.viewer;
 
 import com.groupdocs.ui.viewer.cache.ViewerCache;
-import com.groupdocs.ui.viewer.viewer.CustomViewer;
 import com.groupdocs.viewer.interfaces.ResourceStreamFactory;
 import com.groupdocs.viewer.options.*;
-import com.groupdocs.viewer.results.Page;
 import com.groupdocs.viewer.results.Resource;
-import com.groupdocs.viewer.results.ViewInfo;
-import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
-public class HtmlViewer extends CustomViewer {
+public class HtmlViewer extends CustomViewer<HtmlViewOptions> {
 
-    private final HtmlViewOptions htmlViewOptions;
 
     public HtmlViewer(String filePath, ViewerCache cache, LoadOptions loadOptions) {
         this(filePath, cache, loadOptions, -1, 0);
@@ -23,8 +16,8 @@ public class HtmlViewer extends CustomViewer {
 
     public HtmlViewer(String filePath, ViewerCache cache, LoadOptions loadOptions, int pageNumber/* = -1*/, int newAngle/* = 0*/) {
         super(filePath, cache, loadOptions);
-        this.htmlViewOptions = this.createHtmlViewOptions(pageNumber, newAngle);
-        this.viewInfoOptions = ViewInfoOptions.fromHtmlViewOptions(this.htmlViewOptions);
+        this.viewOptions = this.createHtmlViewOptions(pageNumber, newAngle);
+        this.viewInfoOptions = ViewInfoOptions.fromHtmlViewOptions(this.viewOptions);
     }
 
     private com.groupdocs.viewer.options.HtmlViewOptions createHtmlViewOptions(int passedPageNumber/* = -1*/, int newAngle/* = 0*/) {
@@ -72,27 +65,8 @@ public class HtmlViewer extends CustomViewer {
         return htmlViewOptions;
     }
 
-    public void createCache() {
-        ViewInfo viewInfo = this.getViewInfo();
-
-        synchronized (this.filePath) {
-            int[] missingPages = this.getPagesMissingFromCache(viewInfo.getPages());
-
-            if (missingPages.length > 0) {
-                this.viewer.view(this.htmlViewOptions, missingPages);
-            }
-        }
-    }
-
-    private int[] getPagesMissingFromCache(List<Page> pages) {
-        List<Integer> missingPages = new ArrayList<Integer>();
-        for (Page page : pages) {
-            String pageKey = "p" + page.getNumber() + ".html";
-            if (!this.cache.contains(pageKey)) {
-                missingPages.add(page.getNumber());
-            }
-        }
-
-        return ArrayUtils.toPrimitive(missingPages.toArray(new Integer[0]));
+    @Override
+    protected String getCachePagesExtension() {
+        return ".html";
     }
 }

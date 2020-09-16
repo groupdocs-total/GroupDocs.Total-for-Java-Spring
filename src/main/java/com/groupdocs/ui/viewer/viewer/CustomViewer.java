@@ -6,21 +6,26 @@ import com.groupdocs.ui.viewer.util.ViewerUtils;
 import com.groupdocs.viewer.Viewer;
 import com.groupdocs.viewer.interfaces.PageStreamFactory;
 import com.groupdocs.viewer.options.*;
+import com.groupdocs.viewer.results.Page;
 import com.groupdocs.viewer.results.PdfViewInfo;
 import com.groupdocs.viewer.results.ViewInfo;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class CustomViewer {
+public abstract class CustomViewer<T extends ViewOptions> {
     protected static ViewerConfiguration viewerConfiguration;
     protected final String filePath;
     protected final ViewerCache cache;
     protected final Viewer viewer;
     protected ViewInfoOptions viewInfoOptions;
+    protected T viewOptions;
 
     public CustomViewer(String filePath, ViewerCache cache, LoadOptions loadOptions) {
         this.cache = cache;
@@ -67,6 +72,32 @@ public abstract class CustomViewer {
         }
     }
 
+    public void createCache() {
+        ViewInfo viewInfo = this.getViewInfo();
+
+        synchronized (this.filePath) {
+            int[] missingPages = this.getPagesMissingFromCache(viewInfo.getPages());
+
+            if (missingPages.length > 0) {
+                this.viewer.view(this.viewOptions, missingPages);
+            }
+        }
+    }
+
+    private int[] getPagesMissingFromCache(java.util.List<Page> pages) {
+        List<Integer> missingPages = new ArrayList<>();
+        for (Page page : pages) {
+            String pageKey = "p" + page.getNumber() + getCachePagesExtension();
+            if (!this.cache.contains(pageKey)) {
+                missingPages.add(page.getNumber());
+            }
+        }
+
+        return ArrayUtils.toPrimitive(missingPages.toArray(new Integer[0]));
+    }
+
+    protected abstract String getCachePagesExtension();
+
     protected ViewInfo getViewInfo() {
         String cacheKey = "view_info.dat";
 
@@ -99,9 +130,6 @@ public abstract class CustomViewer {
     public void close() {
         this.viewer.close();
     }
-
-    public abstract void createCache();
-
 
     protected class CustomPageStreamFactory implements PageStreamFactory {
         private final String mExtension;

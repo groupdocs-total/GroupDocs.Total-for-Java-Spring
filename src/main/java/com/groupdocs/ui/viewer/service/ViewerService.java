@@ -1,12 +1,12 @@
 package com.groupdocs.ui.viewer.service;
 
+import com.groupdocs.ui.model.response.PageDescriptionEntity;
 import com.groupdocs.ui.viewer.config.ViewerConfiguration;
 import com.groupdocs.ui.viewer.model.request.LoadDocumentPageRequest;
 import com.groupdocs.ui.viewer.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.viewer.model.request.RotateDocumentPagesRequest;
 import com.groupdocs.ui.viewer.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.viewer.model.response.LoadDocumentEntity;
-import com.groupdocs.ui.viewer.model.response.PageDescriptionEntity;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

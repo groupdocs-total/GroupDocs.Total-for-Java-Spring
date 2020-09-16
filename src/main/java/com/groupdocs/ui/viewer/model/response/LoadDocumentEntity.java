@@ -1,5 +1,7 @@
 package com.groupdocs.ui.viewer.model.response;
 
+import com.groupdocs.ui.model.response.PageDescriptionEntity;
+
 import java.util.ArrayList;
 import java.util.List;
 

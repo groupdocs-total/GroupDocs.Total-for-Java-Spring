@@ -1,19 +1,19 @@
 package com.groupdocs.ui.viewer.service;
 
 import com.groupdocs.ui.config.GlobalConfiguration;
+import com.groupdocs.ui.exception.TotalGroupDocsException;
+import com.groupdocs.ui.model.response.PageDescriptionEntity;
 import com.groupdocs.ui.util.Utils;
 import com.groupdocs.ui.viewer.cache.FileViewerCache;
 import com.groupdocs.ui.viewer.cache.ViewerCache;
 import com.groupdocs.ui.viewer.config.ViewerConfiguration;
 import com.groupdocs.ui.viewer.exception.DiskAccessException;
 import com.groupdocs.ui.viewer.exception.ReadWriteException;
-import com.groupdocs.ui.exception.TotalGroupDocsException;
 import com.groupdocs.ui.viewer.model.request.LoadDocumentPageRequest;
 import com.groupdocs.ui.viewer.model.request.LoadDocumentRequest;
 import com.groupdocs.ui.viewer.model.request.RotateDocumentPagesRequest;
 import com.groupdocs.ui.viewer.model.response.FileDescriptionEntity;
 import com.groupdocs.ui.viewer.model.response.LoadDocumentEntity;
-import com.groupdocs.ui.viewer.model.response.PageDescriptionEntity;
 import com.groupdocs.ui.viewer.util.PagesInfoStorage;
 import com.groupdocs.ui.viewer.util.ViewerUtils;
 import com.groupdocs.ui.viewer.viewer.CustomViewer;
@@ -84,31 +84,13 @@ public class ViewerServiceImpl implements ViewerService {
     public List<FileDescriptionEntity> getFileList(String path) {
         final File filesDirectory = new File(PathUtils.combine(viewerConfiguration.getFilesDirectory(), path));
 
-        List<FileDescriptionEntity> filesList = new ArrayList<>();
         try {
             final File[] files = filesDirectory.listFiles();
             if (files == null) {
                 throw new TotalGroupDocsException("Can't list files");
             }
 
-            for (File file : files) {
-                // check if current file/folder is hidden
-                if (!(file.getName().equals(viewerConfiguration.getCacheFolderName())) || file.getName().startsWith(".") || file.isHidden()) {
-                    FileDescriptionEntity fileDescription = new FileDescriptionEntity();
-                    fileDescription.setGuid(file.getCanonicalFile().getAbsolutePath());
-                    fileDescription.setName(file.getName());
-                    // set is directory true/false
-                    fileDescription.setIsDirectory(file.isDirectory());
-
-                    // set file size
-                    if (!fileDescription.isIsDirectory()) {
-                        fileDescription.setSize(file.length());
-                    }
-
-                    // add object to array list
-                    filesList.add(fileDescription);
-                }
-            }
+            List<FileDescriptionEntity> filesList = createListOfFileDescriptionEntities(files);
 
             // Sort by name and to make directories to be before files
             Collections.sort(filesList, new Comparator<FileDescriptionEntity>() {
@@ -123,9 +105,32 @@ public class ViewerServiceImpl implements ViewerService {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
+            return filesList;
         } catch (IOException e) {
             logger.error("Exception in getting file list", e);
             throw new TotalGroupDocsException(e.getMessage(), e);
+        }
+    }
+
+    private List<FileDescriptionEntity> createListOfFileDescriptionEntities(File[] files) throws IOException {
+        List<FileDescriptionEntity> filesList = new ArrayList<>();
+        for (File file : files) {
+            // check if current file/folder is not hidden
+            if (!(file.getName().equals(viewerConfiguration.getCacheFolderName())) || !file.getName().startsWith(".") || !file.isHidden()) {
+                FileDescriptionEntity fileDescription = new FileDescriptionEntity();
+                fileDescription.setGuid(file.getCanonicalFile().getAbsolutePath());
+                fileDescription.setName(file.getName());
+                // set is directory true/false
+                fileDescription.setIsDirectory(file.isDirectory());
+
+                // set file size
+                if (!fileDescription.isIsDirectory()) {
+                    fileDescription.setSize(file.length());
+                }
+
+                // add object to array list
+                filesList.add(fileDescription);
+            }
         }
         return filesList;
     }
@@ -140,17 +145,13 @@ public class ViewerServiceImpl implements ViewerService {
         String password = loadDocumentRequest.getPassword();
         password = org.apache.commons.lang3.StringUtils.isEmpty(password) ? null : password;
         LoadDocumentEntity loadDocumentEntity;
-        CustomViewer customViewer = null;
+        CustomViewer<?> customViewer = null;
         try {
             String fileCacheSubFolder = createFileCacheSubFolderPath(documentGuid);
 
             ViewerCache cache = new FileViewerCache(mCachePath, fileCacheSubFolder);
 
-            if (viewerConfiguration.isHtmlMode()) {
-                customViewer = new HtmlViewer(documentGuid, cache, createLoadOptions(password));
-            } else {
-                customViewer = new PngViewer(documentGuid, cache, createLoadOptions(password));
-            }
+            customViewer = createCustomViewer(documentGuid, password, cache);
             loadDocumentEntity = getLoadDocumentEntity(loadAllPages, documentGuid, fileCacheSubFolder, customViewer);
             loadDocumentEntity.setShowGridLines(viewerConfiguration.getShowGridLines());
             loadDocumentEntity.setPrintAllowed(viewerConfiguration.getPrintAllowed());
@@ -177,17 +178,13 @@ public class ViewerServiceImpl implements ViewerService {
         Integer pageNumber = loadDocumentPageRequest.getPage();
         String password = loadDocumentPageRequest.getPassword();
         password = org.apache.commons.lang3.StringUtils.isEmpty(password) ? null : password;
-        CustomViewer customViewer = null;
+        CustomViewer<?> customViewer = null;
         try {
             String fileCacheSubFolder = createFileCacheSubFolderPath(documentGuid);
 
             ViewerCache cache = new FileViewerCache(mCachePath, fileCacheSubFolder);
 
-            if (viewerConfiguration.isHtmlMode()) {
-                customViewer = new HtmlViewer(documentGuid, cache, createLoadOptions(password));
-            } else {
-                customViewer = new PngViewer(documentGuid, cache, createLoadOptions(password));
-            }
+            customViewer = createCustomViewer(documentGuid, password, cache);
             return getPageDescriptionEntity(customViewer, documentGuid, pageNumber, fileCacheSubFolder);
         } catch (Exception ex) {
             logger.error("Exception in loading document page", ex);
@@ -197,6 +194,16 @@ public class ViewerServiceImpl implements ViewerService {
                 customViewer.close();
             }
         }
+    }
+
+    private CustomViewer<?> createCustomViewer(String documentGuid, String password, ViewerCache cache) {
+        CustomViewer<?> customViewer;
+        if (viewerConfiguration.isHtmlMode()) {
+            customViewer = new HtmlViewer(documentGuid, cache, createLoadOptions(password));
+        } else {
+            customViewer = new PngViewer(documentGuid, cache, createLoadOptions(password));
+        }
+        return customViewer;
     }
 
     /**
@@ -210,7 +217,7 @@ public class ViewerServiceImpl implements ViewerService {
         String password = rotateDocumentPagesRequest.getPassword();
         Integer angle = rotateDocumentPagesRequest.getAngle();
         int pageNumber = pages.get(0);
-        CustomViewer customViewer = null;
+        CustomViewer<?> customViewer = null;
 
         try {
             String fileCacheSubFolder = createFileCacheSubFolderPath(documentGuid);
