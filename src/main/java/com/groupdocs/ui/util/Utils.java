@@ -1,10 +1,7 @@
 package com.groupdocs.ui.util;
 
-import com.aspose.words.IncorrectPasswordException;
 import com.groupdocs.ui.config.ServerConfiguration;
 import com.groupdocs.ui.exception.TotalGroupDocsException;
-import com.groupdocs.viewer.exception.GroupDocsViewerException;
-import com.groupdocs.viewer.exception.InvalidPasswordException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

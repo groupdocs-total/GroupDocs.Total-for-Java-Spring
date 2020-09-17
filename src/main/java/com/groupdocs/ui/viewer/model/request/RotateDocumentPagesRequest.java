@@ -1,7 +1,5 @@
 package com.groupdocs.ui.viewer.model.request;
 
-import com.groupdocs.ui.model.request.LoadDocumentRequest;
-
 import java.util.List;
 
 public class RotateDocumentPagesRequest extends LoadDocumentRequest {

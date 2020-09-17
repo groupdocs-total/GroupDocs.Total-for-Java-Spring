@@ -2,6 +2,7 @@ package com.groupdocs.ui.viewer;
 
 import com.google.gson.Gson;
 import com.groupdocs.ui.model.request.FileTreeRequest;
+import com.groupdocs.ui.viewer.controller.ViewerController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
