@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import javax.activation.MimetypesFileTypeMap;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLConnection;
@@ -20,16 +19,9 @@ public class ViewerUtils {
     private static final Logger logger = LoggerFactory.getLogger(ViewerUtils.class);
 
     public static MediaType detectMediaType(String fileName) {
-        String mediaType;
+        String mediaType = null;
         try {
-            mediaType = Files.probeContentType(new File(fileName).toPath());
-            if (mediaType == null) {
-                mediaType = URLConnection.guessContentTypeFromName(fileName);
-            }
-            if (mediaType == null) {
-                mediaType = new MimetypesFileTypeMap().getContentType(fileName);
-            }
-            if (mediaType == null || (mediaType.equals(MediaType.APPLICATION_OCTET_STREAM_VALUE) && fileName.contains("."))) {
+            if (fileName.contains(".")) {
                 final String extension = fileName.substring(fileName.lastIndexOf("."));
                 switch (extension) {
                     case ".otf":
@@ -50,8 +42,20 @@ public class ViewerUtils {
                     case ".eot":
                         mediaType = "application/vnd.ms-fontobject";
                         break;
+                    case ".js":
+                        mediaType = "application/javascript";
+                        break;
                     default:
-                        mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+                        mediaType = null;
+                }
+            }
+            if (mediaType == null) {
+                mediaType = Files.probeContentType(new File(fileName).toPath());
+                if (mediaType == null) {
+                    mediaType = URLConnection.guessContentTypeFromName(fileName);
+                }
+                if (mediaType == null) {
+                    return MediaType.APPLICATION_OCTET_STREAM;
                 }
             }
         } catch (IOException e) {
