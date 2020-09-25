@@ -101,7 +101,7 @@ public class EditorServiceImpl implements EditorService {
         try {
             // set GroupDocs license
             License license = new License();
-            license.setLicense("C:\\my_projects\\java\\license\\Conholdate.Total.Product.Family.lic");
+            license.setLicense(globalConfiguration.getApplication().getLicensePath());
         } catch (Throwable throwable) {
             logger.error("Can not verify Editor license!");
         }
