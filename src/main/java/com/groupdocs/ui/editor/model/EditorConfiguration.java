@@ -7,7 +7,8 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 
-import static com.groupdocs.ui.config.DefaultDirectories.*;
+import static com.groupdocs.ui.config.DefaultDirectories.defaultEditorDirectory;
+import static com.groupdocs.ui.config.DefaultDirectories.relativePathToAbsolute;
 
 @Component
 public class EditorConfiguration extends CommonConfiguration {
