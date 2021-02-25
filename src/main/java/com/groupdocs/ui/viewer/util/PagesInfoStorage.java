@@ -1,14 +1,14 @@
 package com.groupdocs.ui.viewer.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.groupdocs.ui.viewer.exception.DiskAccessException;
 import com.groupdocs.ui.viewer.exception.ReadWriteException;
 import com.groupdocs.viewer.results.Page;
 import com.groupdocs.viewer.results.ViewInfo;
-import com.groupdocs.viewer.utils.PathUtils;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,40 +16,50 @@ public class PagesInfoStorage {
     private static final String FILE_NAME = "PagesInfo.xml";
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static int loadPageAngle(String fileCacheSubFolder, int pageNumber) {
+    public static int loadPageAngle(Path resourceDir, String documentGuid, int pageNumber) {
         try {
-            final File pagesInfoFile = new File(fileCacheSubFolder.endsWith(FILE_NAME) ? fileCacheSubFolder : PathUtils.combine(fileCacheSubFolder, FILE_NAME));
-            return MAPPER.readValue(FileUtils.readFileToByteArray(pagesInfoFile), PagesInfo.class).getPageByNumber(pageNumber).getAngle();
+            final String subDir = ViewerUtils.replaceChars(Paths.get(documentGuid).getFileName().toString());
+            final Path pagesInfoFile = resourceDir.resolve(subDir).resolve(FILE_NAME);
+            if (Files.notExists(pagesInfoFile)) {
+                return 0;
+            }
+            return MAPPER.readValue(FileUtils.readFileToByteArray(pagesInfoFile.toFile()), PagesInfo.class).getPageByNumber(pageNumber).getAngle();
         } catch (Exception e) {
             throw new ReadWriteException(e);
         }
     }
 
-    public static void savePageAngle(String fileCacheSubFolder, int pageNumber, int newAngle) {
+    public static void savePageAngle(Path resourceDir, String documentGuid, int pageNumber, int newAngle) {
         try {
-            File pagesInfoFile = new File(fileCacheSubFolder.endsWith(FILE_NAME) ? fileCacheSubFolder : PathUtils.combine(fileCacheSubFolder, FILE_NAME));
+            final String subDir = ViewerUtils.replaceChars(Paths.get(documentGuid).getFileName().toString());
+            Path fileInfoDir = resourceDir.resolve(subDir);
+            if (Files.notExists(fileInfoDir)) {
+                Files.createDirectories(fileInfoDir);
+            }
+            Path pagesInfoFile = fileInfoDir.resolve(FILE_NAME);
 
-            if (pagesInfoFile.exists()) {
-                PagesInfoStorage.PagesInfo pagesInfo = MAPPER.readValue(pagesInfoFile, PagesInfoStorage.PagesInfo.class);
+            if (Files.exists(pagesInfoFile)) {
+                PagesInfoStorage.PagesInfo pagesInfo = MAPPER.readValue(pagesInfoFile.toFile(), PagesInfoStorage.PagesInfo.class);
                 final PagesInfoStorage.PagesInfo.PageData pageData = pagesInfo.getPageByNumber(pageNumber);
                 pageData.setAngle(newAngle);
 
-                MAPPER.writeValue(pagesInfoFile, pagesInfo);
+                MAPPER.writeValue(pagesInfoFile.toFile(), pagesInfo);
             }
         } catch (Exception e) {
             throw new ReadWriteException(e);
         }
     }
 
-    public static String createPagesInfo(String fileCacheSubFolder, ViewInfo viewInfo) {
+    public static void createPagesInfo(Path resourceDir, String documentGuid, ViewInfo viewInfo) {
         try {
-            final File file = new File(fileCacheSubFolder);
-            if (!file.exists() && !file.mkdir()) {
-                throw new DiskAccessException("create pages info directory", file);
+            final String subDir = ViewerUtils.replaceChars(Paths.get(documentGuid).getFileName().toString());
+            Path fileInfoDir = resourceDir.resolve(subDir);
+            if (Files.notExists(fileInfoDir)) {
+                Files.createDirectories(fileInfoDir);
             }
 
-            final File pagesInfoFile = new File(PathUtils.combine(fileCacheSubFolder, FILE_NAME));
-            if (!pagesInfoFile.exists()) {
+            Path pagesInfoPath = fileInfoDir.resolve(FILE_NAME);
+            if (Files.notExists(pagesInfoPath)) {
                 final PagesInfoStorage.PagesInfo pagesInfo = new PagesInfoStorage.PagesInfo();
                 for (Page page : viewInfo.getPages()) {
                     final PagesInfoStorage.PagesInfo.PageData pageData = new PagesInfoStorage.PagesInfo.PageData();
@@ -57,9 +67,8 @@ public class PagesInfoStorage {
                     pageData.setAngle(0);
                     pagesInfo.getPages().add(pageData);
                 }
-                MAPPER.writeValue(pagesInfoFile, pagesInfo);
+                MAPPER.writeValue(pagesInfoPath.toFile(), pagesInfo);
             }
-            return pagesInfoFile.getAbsolutePath();
         } catch (Exception e) {
             throw new ReadWriteException(e);
         }

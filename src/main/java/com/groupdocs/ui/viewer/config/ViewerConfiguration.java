@@ -59,6 +59,9 @@ public class ViewerConfiguration extends CommonConfiguration {
     @Value("${viewer.cacheFolderName}")
     private String cacheFolderName;
 
+    @Value("${viewer.resourcesFolderName}")
+    private String resourcesFolderName;
+
     @PostConstruct
     public void init() {
         this.filesDirectory = StringUtils.isEmpty(this.filesDirectory) ? defaultViewerDirectory() : relativePathToAbsolute(this.filesDirectory);
@@ -187,6 +190,14 @@ public class ViewerConfiguration extends CommonConfiguration {
         this.cacheFolderName = cacheFolderName;
     }
 
+    public String getResourcesFolderName() {
+        return resourcesFolderName;
+    }
+
+    public void setResourcesFolderName(String resourcesFolderName) {
+        this.resourcesFolderName = resourcesFolderName;
+    }
+
     @Override
     public String toString() {
         return "ViewerConfiguration{" +
@@ -204,7 +215,8 @@ public class ViewerConfiguration extends CommonConfiguration {
                 ", watermarkText='" + watermarkText + '\'' +
                 ", printAllowed=" + printAllowed +
                 ", showGridLines=" + showGridLines +
-                ", cacheFolderName=" + cacheFolderName +
+                ", cacheFolderName='" + cacheFolderName + '\'' +
+                ", resourcesFolderName='" + resourcesFolderName + '\'' +
                 '}';
     }
 }

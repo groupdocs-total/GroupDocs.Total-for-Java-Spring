@@ -1,61 +1,55 @@
 package com.groupdocs.ui.viewer.viewer;
 
-import com.groupdocs.ui.viewer.cache.ViewerCache;
-import com.groupdocs.viewer.interfaces.ResourceStreamFactory;
-import com.groupdocs.viewer.options.*;
-import com.groupdocs.viewer.results.Resource;
+import com.groupdocs.ui.viewer.config.ViewerConfiguration;
+import com.groupdocs.ui.viewer.util.ViewerUtils;
+import com.groupdocs.viewer.options.HtmlViewOptions;
+import com.groupdocs.viewer.options.Rotation;
+import com.groupdocs.viewer.options.TextOverflowMode;
+import com.groupdocs.viewer.options.ViewInfoOptions;
 
-import java.io.*;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class HtmlViewer extends CustomViewer<HtmlViewOptions> {
 
+    private CustomPageStreamFactory mPageStreamFactory;
+    private CustomResourceStreamFactory mResourceStreamFactory;
 
-    public HtmlViewer(String filePath, ViewerCache cache, LoadOptions loadOptions) {
-        this(filePath, cache, loadOptions, -1, 0);
+    public HtmlViewer(String filePath, String password, ViewerConfiguration viewerConfiguration) {
+        this(filePath, password, viewerConfiguration, -1, 0);
     }
 
-    public HtmlViewer(String filePath, ViewerCache cache, LoadOptions loadOptions, int pageNumber/* = -1*/, int newAngle/* = 0*/) {
-        super(filePath, cache, loadOptions);
-        this.viewOptions = this.createHtmlViewOptions(pageNumber, newAngle);
+    public HtmlViewer(String filePath, String password, ViewerConfiguration viewerConfiguration, int pageNumber/* = -1*/, int newAngle/* = 0*/) {
+        super(filePath, viewerConfiguration, password);
+        this.viewOptions = this.createHtmlViewOptions(filePath, viewerConfiguration, pageNumber, newAngle);
         this.viewInfoOptions = ViewInfoOptions.fromHtmlViewOptions(this.viewOptions);
     }
 
-    private com.groupdocs.viewer.options.HtmlViewOptions createHtmlViewOptions(int passedPageNumber/* = -1*/, int newAngle/* = 0*/) {
-        HtmlViewOptions htmlViewOptions = HtmlViewOptions.forExternalResources(new CustomPageStreamFactory(".html"), new ResourceStreamFactory() {
-            @Override
-            public OutputStream createResourceStream(int pageNumber, Resource resource) {
-                String fileName = "p" + pageNumber + "_" + resource.getFileName();
-                String cacheFilePath = cache.getCacheFilePath(fileName);
+    @Override
+    public String getPageContent(int pageNumber) {
+        viewer.view(this.viewOptions, pageNumber);
+        try {
+            final byte[] pageContent = mPageStreamFactory.getPageContent(pageNumber);
+            return new String(pageContent, Charset.defaultCharset());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 
-                try {
-                    return new FileOutputStream(cacheFilePath);
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            }
-
-            @Override
-            public String createResourceUrl(int pageNumber, Resource resource) {
-                String urlPrefix = "/viewer/resources/" + new File(filePath).getName().replace(".", "_");
-                return urlPrefix + "/p" + pageNumber + "_" + resource.getFileName();
-            }
-
-            @Override
-            public void closeResourceStream(int pageNumber, Resource resource, OutputStream outputStream) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            }
-        });
+    private com.groupdocs.viewer.options.HtmlViewOptions createHtmlViewOptions(String documentGuid, ViewerConfiguration viewerConfiguration, int passedPageNumber/* = -1*/, int newAngle/* = 0*/) {
+        final Path resourcesDir = ViewerUtils.makeResourcesDir(viewerConfiguration);
+        final String subFolder = ViewerUtils.replaceChars(Paths.get(documentGuid).getFileName().toString());
+        mPageStreamFactory = new CustomPageStreamFactory(resourcesDir.resolve(subFolder), ".html");
+        mResourceStreamFactory = new CustomResourceStreamFactory(resourcesDir, subFolder);
+        HtmlViewOptions htmlViewOptions = HtmlViewOptions.forExternalResources(mPageStreamFactory, mResourceStreamFactory);
 
         htmlViewOptions.getSpreadsheetOptions().setTextOverflowMode(TextOverflowMode.HIDE_TEXT);
         htmlViewOptions.getSpreadsheetOptions().setSkipEmptyColumns(true);
         htmlViewOptions.getSpreadsheetOptions().setSkipEmptyRows(true);
-        setWatermarkOptions(htmlViewOptions);
+        setWatermarkOptions(htmlViewOptions, viewerConfiguration.getWatermarkText());
 
         if (passedPageNumber >= 0 && newAngle != 0) {
             Rotation rotationAngle = getRotationByAngle(newAngle);
@@ -63,10 +57,5 @@ public class HtmlViewer extends CustomViewer<HtmlViewOptions> {
         }
 
         return htmlViewOptions;
-    }
-
-    @Override
-    protected String getCachePagesExtension() {
-        return ".html";
     }
 }

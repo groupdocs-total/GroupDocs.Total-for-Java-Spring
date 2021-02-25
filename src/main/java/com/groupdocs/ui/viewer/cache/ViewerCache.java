@@ -1,34 +1,17 @@
 package com.groupdocs.ui.viewer.cache;
 
+import com.groupdocs.viewer.caching.Cache;
+
+import java.nio.file.Path;
+
 /**
  * Defines methods required for storing rendered document and document resources сache.
  */
-public interface ViewerCache {
+public interface ViewerCache extends Cache {
     /**
      * The Relative or absolute path to the cache folder.
      */
-    String getCachePath();
-
-    /**
-     * The sub-folder to append to the CachePath.
-     */
-    String getCacheSubFolder();
-
-    /**
-     * Inserts a cache entry into the cache.
-     *
-     * @param key   A unique identifier for the cache entry.
-     * @param value The object to insert.
-     */
-    <T> void set(String key, T value);
-
-    /**
-     * Gets the entry associated with this key if present.
-     *
-     * @param key A key identifying the requested entry.
-     * @return true if the key was found.
-     */
-    <T> T getValue(String key, T defaultEntry, Class<?>[] clazzs);
+    Path getCachePath();
 
     /**
      * Gets cache file path;.
@@ -36,7 +19,7 @@ public interface ViewerCache {
      * @param key The cache file key.
      * @return Cache file path.
      */
-    String getCacheFilePath(String key);
+    Path getCacheFilePath(String key);
 
-    boolean doesNotContains(String key);
+    void clearCache(int pageNumber);
 }

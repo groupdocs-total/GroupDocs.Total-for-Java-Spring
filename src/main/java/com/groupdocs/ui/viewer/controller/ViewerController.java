@@ -98,9 +98,6 @@ public class ViewerController {
 
     /**
      * Get all pages for thumbnails
-     *
-     * @param loadDocumentRequest
-     * @return
      */
     @RequestMapping(method = RequestMethod.POST, value = "/loadThumbnails", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
     @ResponseBody

@@ -2,8 +2,8 @@ package com.groupdocs.ui.comparison;
 
 import com.google.common.collect.Ordering;
 import com.groupdocs.comparison.Comparer;
+import com.groupdocs.comparison.changes.ChangeInfo;
 import com.groupdocs.comparison.common.PageImage;
-import com.groupdocs.comparison.common.changes.ChangeInfo;
 import com.groupdocs.comparison.common.compareresult.ICompareResult;
 import com.groupdocs.comparison.common.comparisonsettings.ComparisonSettings;
 import com.groupdocs.comparison.common.exceptions.cellexceptions.InvalidCellPasswordException;
