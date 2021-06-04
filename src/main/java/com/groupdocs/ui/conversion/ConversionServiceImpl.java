@@ -188,7 +188,7 @@ public class ConversionServiceImpl implements ConversionService {
         // set file name
         fileDescription.setName(file.getName());
         // set is directory true/false
-        fileDescription.setDirectory(file.isDirectory());
+        fileDescription.setIsDirectory(file.isDirectory());
         // set file size
         fileDescription.setSize(file.length());
 

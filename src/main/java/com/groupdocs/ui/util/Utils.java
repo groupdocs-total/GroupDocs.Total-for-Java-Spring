@@ -74,12 +74,22 @@ public class Utils {
     /**
      * Read stream and convert to string
      *
-     * @param inputStream
      * @return
      * @throws IOException
      */
     public static String getStringFromStream(InputStream inputStream) throws IOException {
         byte[] bytes = IOUtils.toByteArray(inputStream);
+        // encode ByteArray into String
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    /**
+     * Read stream and convert to string
+     *
+     * @return
+     * @throws IOException
+     */
+    public static String getStringFromStream(byte[] bytes) throws IOException {
         // encode ByteArray into String
         return Base64.getEncoder().encodeToString(bytes);
     }

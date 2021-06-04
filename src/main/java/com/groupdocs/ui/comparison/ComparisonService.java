@@ -38,12 +38,20 @@ public interface ComparisonService {
     CompareResultResponse compare(CompareRequest compareRequest);
 
     /**
+     * Load the description of the page
+     *
+     * @param loadDocumentPageRequest request with parameters
+     * @return the description of the page
+     */
+    LoadDocumentEntity loadDocumentDescription(LoadDocumentPageRequest loadDocumentPageRequest);
+
+    /**
      * Load the page of results
      *
      * @param loadDocumentPageRequest request with path to page result
      * @return page result data
      */
-    PageDescriptionEntity loadResultPage(LoadDocumentPageRequest loadDocumentPageRequest);
+    PageDescriptionEntity loadDocumentPage(LoadDocumentPageRequest loadDocumentPageRequest);
 
     /**
      * Check format files for comparing
@@ -52,6 +60,4 @@ public interface ComparisonService {
      * @return true - formats of the both files are the same and format is supported, false - other
      */
     boolean checkFiles(CompareRequest request);
-
-    LoadDocumentEntity loadDocument(LoadDocumentRequest loadDocumentRequest);
 }

@@ -133,7 +133,7 @@ public class EditorServiceImpl implements EditorService {
                 FileDescriptionEntity fileDescription = new FileDescriptionEntity();
                 fileDescription.setGuid(guid);
                 fileDescription.setName(file.getName());
-                fileDescription.setDirectory(file.isDirectory());
+                fileDescription.setIsDirectory(file.isDirectory());
                 fileDescription.setSize(file.length());
                 fileList.add(fileDescription);
             }

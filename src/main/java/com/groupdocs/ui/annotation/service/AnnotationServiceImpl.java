@@ -111,7 +111,7 @@ public class AnnotationServiceImpl implements AnnotationService {
                 // set file type
                 fileDescription.setDocType(fd.getDocumentType());
                 // set is directory true/false
-                fileDescription.setDirectory(fd.isDirectory());
+                fileDescription.setIsDirectory(fd.isDirectory());
                 // set file size
                 fileDescription.setSize(fd.getSize());
                 // add object to array list

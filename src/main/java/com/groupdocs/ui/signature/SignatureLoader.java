@@ -195,7 +195,7 @@ public class SignatureLoader {
         fileDescription.setGuid(file.getAbsolutePath());
         fileDescription.setName(file.getName());
         // set is directory true/false
-        fileDescription.setDirectory(file.isDirectory());
+        fileDescription.setIsDirectory(file.isDirectory());
         // set file size
         fileDescription.setSize(file.length());
         if (withImage) {
