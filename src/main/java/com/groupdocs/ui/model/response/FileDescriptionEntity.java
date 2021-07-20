@@ -18,7 +18,7 @@ public class FileDescriptionEntity {
      * @return guid
      */
     public String getGuid() {
-        return guid;
+        return guid.replace("\\", "//");
     }
 
     /**
