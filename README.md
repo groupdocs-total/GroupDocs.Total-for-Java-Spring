@@ -5,6 +5,8 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/6a67135407f3b0dab72a/maintainability)](https://codeclimate.com/github/groupdocs-total/GroupDocs.Total-for-Java-Spring/maintainability)
 [![GitHub license](https://img.shields.io/github/license/groupdocs-total/GroupDocs.Total-for-Java-Spring.svg)](https://github.com/groupdocs-total/GroupDocs.Total-for-Java-Spring/blob/master/LICENSE)
 
+:warning: **This repository has moved to https://github.com/groupdocs-total/GroupDocs.Total-for-Java/tree/main/Demos/Spring**
+
 ## System Requirements
 - Java 8 (JDK 1.8)
 - Maven 3
